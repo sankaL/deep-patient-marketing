@@ -1,0 +1,7 @@
+# app files
+deep-patient-app/*
+
+# video filea
+*.mov
+*.mp4
+*.webm

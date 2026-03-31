@@ -1,0 +1,15 @@
+--brand-forest,187 21% 16%, #202F31
+--brand-sage,38 92% 76%, #F9D38B
+--brand-cream,0 0% 100%, #FFFFFF
+--brand-cream-dark,30 15% 93%, #F0EEEC
+--brand-bark,26 40% 39%, #8B5E3C
+--foreground,152 59% 5%, #05140D
+--muted-foreground,152 10% 40%, #5C7066
+--feedback-cta,40 89% 55%, #F2B027
+--destructive,0 86% 57%, #F03333
+--border,30 12% 85%, #DEDAD6
+--success,120 41% 30%, #2D6A2D
+--warning,32 82% 55%, #EE972C
+--surface-1,40 43% 98%, #FDFBFA
+--surface-elevated,0 0% 100% / 0.82, #FFFFFFD1
+--hero-glow,38 92% 76% / 0.4, #F9D38B66
