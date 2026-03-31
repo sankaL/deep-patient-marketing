@@ -37,19 +37,22 @@ function ElegantShape({
         opacity: { duration: 1.2 },
       }}
       className={cn("absolute", className)}
+      style={{ willChange: "transform", transform: "translateZ(0)" }}
     >
       <motion.div
         animate={{
-          y: [0, 15, 0],
+          y: [0, 8, 0],
         }}
         transition={{
-          duration: 12,
+          duration: 18,
           repeat: Number.POSITIVE_INFINITY,
           ease: "easeInOut",
         }}
         style={{
           width,
           height,
+          willChange: "transform",
+          transform: "translateZ(0)",
         }}
         className="relative"
       >
@@ -58,10 +61,8 @@ function ElegantShape({
             "absolute inset-0 rounded-full",
             "bg-gradient-to-r to-transparent",
             gradient,
-            "backdrop-blur-[2px] border-2 border-white/[0.15]",
-            "shadow-[0_8px_32px_0_rgba(255,255,255,0.1)]",
-            "after:absolute after:inset-0 after:rounded-full",
-            "after:bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.2),transparent_70%)]"
+            "border-2 border-white/[0.12]",
+            "shadow-[0_8px_32px_0_rgba(255,255,255,0.06)]"
           )}
         />
       </motion.div>
@@ -71,7 +72,7 @@ function ElegantShape({
 
 function HeroShapes() {
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+    <div className="absolute inset-0 overflow-hidden pointer-events-none [contain:layout]">
       <ElegantShape
         delay={0.3}
         width={600}

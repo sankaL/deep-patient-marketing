@@ -218,14 +218,14 @@ const HeroSection = () => {
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#030303]">
-      {/* Gradient background — warm gold + forest glow */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[hsl(38,92%,76%)]/[0.04] via-transparent to-[hsl(26,40%,39%)]/[0.04] blur-3xl" />
-      <div className="flex flex-col items-end absolute -right-60 -top-10 blur-xl z-0">
-        <div className="h-[10rem] rounded-full w-[60rem] z-1 bg-gradient-to-b blur-[6rem] from-[hsl(38,92%,76%)] to-[hsl(187,21%,16%)]"></div>
-        <div className="h-[10rem] rounded-full w-[90rem] z-1 bg-gradient-to-b blur-[6rem] from-[hsl(26,40%,39%)] to-[hsl(40,89%,55%)]"></div>
-        <div className="h-[10rem] rounded-full w-[60rem] z-1 bg-gradient-to-b blur-[6rem] from-[hsl(40,89%,55%)] to-[hsl(187,21%,22%)]"></div>
+      {/* Gradient background — warm gold + forest glow - GPU-accelerated */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[hsl(38,92%,76%)]/[0.04] via-transparent to-[hsl(26,40%,39%)]/[0.04]" />
+      <div className="flex flex-col items-end absolute -right-60 -top-10 z-0 [will-change:transform] [transform:translateZ(0)]">
+        <div className="h-[10rem] rounded-full w-[60rem] z-1 bg-gradient-to-b blur-[3rem] from-[hsl(38,92%,76%)]/30 to-[hsl(187,21%,16%)]/20 [will-change:transform] [transform:translateZ(0)]"></div>
+        <div className="h-[10rem] rounded-full w-[90rem] z-1 bg-gradient-to-b blur-[3rem] from-[hsl(26,40%,39%)]/30 to-[hsl(40,89%,55%)]/20 [will-change:transform] [transform:translateZ(0)]"></div>
+        <div className="h-[10rem] rounded-full w-[60rem] z-1 bg-gradient-to-b blur-[3rem] from-[hsl(40,89%,55%)]/30 to-[hsl(187,21%,22%)]/20 [will-change:transform] [transform:translateZ(0)]"></div>
       </div>
-      <div className="absolute inset-0 z-0 bg-noise opacity-30"></div>
+      <div className="absolute inset-0 z-0 bg-noise opacity-30 [will-change:opacity]"></div>
 
       {/* ── Elegant floating shapes ── */}
       <HeroShapes />
