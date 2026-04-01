@@ -4,11 +4,12 @@ from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 
-from config import AdminAuthSettings
+from config import AppConfigurationError, AdminAuthSettings
 from dependencies import (
     get_admin_auth_service,
+    get_tavus_admin_runtime_config,
     get_tavus_admin_service,
-    get_tavus_runtime_config,
+    get_tavus_preview_max_duration_config,
 )
 from models.admin import (
     AdminLoginRequest,
@@ -181,12 +182,15 @@ async def tavus_dashboard(
     _: str = Depends(_require_admin_email),
     tavus_admin: TavusAdminService = Depends(get_tavus_admin_service),
 ) -> TavusDashboardResponse:
-    runtime = get_tavus_runtime_config()
     try:
         return await tavus_admin.get_dashboard(
-            preview_max_duration_seconds=runtime.preview_max_duration_seconds,
-            api_key_encryption_key=runtime.api_key_encryption_key,
+            preview_max_duration_seconds=get_tavus_preview_max_duration_config(),
         )
+    except AppConfigurationError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=str(exc),
+        ) from exc
     except SupabaseRestError as exc:
         raise HTTPException(
             status_code=exc.status_code,
@@ -208,7 +212,13 @@ async def rotate_tavus_key(
             detail=str(exc),
         ) from exc
 
-    runtime = get_tavus_runtime_config()
+    try:
+        runtime = get_tavus_admin_runtime_config()
+    except AppConfigurationError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=str(exc),
+        ) from exc
 
     try:
         rotation = await tavus_admin.begin_rotation(

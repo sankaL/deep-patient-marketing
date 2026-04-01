@@ -7,8 +7,10 @@ from config import (
     NotificationSettings,
     SupabaseSettings,
     TavusRuntimeSettings,
+    get_tavus_admin_runtime_settings,
     get_admin_auth_settings,
     get_notification_settings,
+    get_tavus_preview_max_duration_seconds,
     get_supabase_settings,
     get_tavus_runtime_settings,
 )
@@ -38,6 +40,16 @@ def _get_admin_auth_settings() -> AdminAuthSettings:
 @lru_cache(maxsize=1)
 def _get_tavus_runtime_settings() -> TavusRuntimeSettings:
     return get_tavus_runtime_settings()
+
+
+@lru_cache(maxsize=1)
+def _get_tavus_admin_runtime_settings() -> TavusRuntimeSettings:
+    return get_tavus_admin_runtime_settings()
+
+
+@lru_cache(maxsize=1)
+def _get_tavus_preview_max_duration_seconds() -> int:
+    return get_tavus_preview_max_duration_seconds()
 
 
 @lru_cache(maxsize=1)
@@ -72,3 +84,11 @@ def get_tavus_admin_service() -> TavusAdminService:
 
 def get_tavus_runtime_config() -> TavusRuntimeSettings:
     return _get_tavus_runtime_settings()
+
+
+def get_tavus_admin_runtime_config() -> TavusRuntimeSettings:
+    return _get_tavus_admin_runtime_settings()
+
+
+def get_tavus_preview_max_duration_config() -> int:
+    return _get_tavus_preview_max_duration_seconds()

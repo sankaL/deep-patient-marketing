@@ -57,12 +57,13 @@ def test_demo_request_notifications_use_sales_and_reply_to(monkeypatch):
     assert customer_email["from"] == "Deep Patient <sales@deeppatient.io>"
     assert customer_email["to"] == ["jane@example.com"]
     assert customer_email["reply_to"] == ["sales@deeppatient.io"]
-    assert "https://deeppatient.io/brand/deeppatient-logo-white-160.png" in str(
-        customer_email["html"]
+    assert (
+        '<span style="color: #F9D38B;">Deep</span><span style="color: #FFFFFF;">Patient</span>'
+        in str(customer_email["html"])
     )
-    assert "Deep Patient" in str(customer_email["html"])
     assert "https://video.example.com/deeppatient-demo" in str(customer_email["html"])
     assert "https://video.example.com/deeppatient-demo" in str(customer_email["text"])
+    assert "attachments" not in customer_email
 
 
 def test_pricing_request_notifications_send_internal_and_confirmation(monkeypatch):
@@ -111,3 +112,4 @@ def test_low_quota_alert_targets_sales_inbox(monkeypatch):
     assert len(calls) == 1
     assert calls[0]["from"] == "Deep Patient <sales@deeppatient.io>"
     assert calls[0]["to"] == ["sales@deeppatient.io"]
+    assert "attachments" not in calls[0]

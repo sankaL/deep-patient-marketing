@@ -14,7 +14,7 @@ Create the backend env file before starting the stack:
 cp backend/.env.example backend/.env
 ```
 
-For local development, the committed example points the backend at the local PostgREST gateway on `http://localhost:54321` and seeds one active Tavus key/scenario from the bootstrap variables.
+For local development, the committed example points the backend at the local Supabase gateway on `http://localhost:55431` and seeds one active Tavus key/scenario from the bootstrap variables.
 The backend now also expects Supabase Auth settings for the hidden admin portal. Configure `SUPABASE_AUTH_URL`, `SUPABASE_ANON_KEY`, and `ADMIN_EMAILS` in `backend/.env` before using `/admin`.
 
 ## Start The Stack
@@ -27,7 +27,7 @@ This starts:
 
 - the Vite frontend on `http://localhost:5173`
 - the FastAPI backend on `http://localhost:8000`
-- the local Supabase-compatible REST gateway on `http://localhost:55431` when `SUPABASE_MODE=local`
+- the local Supabase gateway for both REST and Auth on `http://localhost:55431` when `SUPABASE_MODE=local`
 - the local Postgres database on `localhost:55432` when `SUPABASE_MODE=local`
 
 The frontend proxies `/api` requests to the backend container, so browser requests stay same-origin during development.

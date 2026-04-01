@@ -5,7 +5,7 @@ SUPABASE_MODE := $(if $(SUPABASE_MODE_RAW),$(SUPABASE_MODE_RAW),local)
 COMPOSE_BASE := docker compose -f docker-compose.yml
 COMPOSE_LOCAL := docker compose -f docker-compose.yml -f supabase/docker-compose.yml
 COMPOSE := $(if $(filter local,$(SUPABASE_MODE)),$(COMPOSE_LOCAL),$(COMPOSE_BASE))
-LOCAL_SUPABASE_SERVICES := supabase-db supabase-rest supabase-gateway supabase-bootstrap
+LOCAL_SUPABASE_SERVICES := supabase-db supabase-rest supabase-auth supabase-gateway supabase-bootstrap
 
 build:
 	$(COMPOSE) build

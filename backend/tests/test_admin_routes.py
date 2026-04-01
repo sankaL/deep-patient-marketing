@@ -6,7 +6,7 @@ from types import SimpleNamespace
 from uuid import uuid4
 
 import routes.admin as admin_routes
-from config import AdminAuthSettings, TavusRuntimeSettings
+from config import AdminAuthSettings, TavusConfigurationError, TavusRuntimeSettings
 from dependencies import get_admin_auth_service, get_tavus_admin_service
 from models.admin import TavusDashboardResponse, TavusUsageSummary
 from services.admin_auth import AdminAuthError, AdminSession
@@ -81,9 +81,7 @@ class FakeTavusAdminService:
     def __init__(self) -> None:
         self.begin_called = False
 
-    async def get_dashboard(
-        self, *, preview_max_duration_seconds: int, api_key_encryption_key: str
-    ):
+    async def get_dashboard(self, *, preview_max_duration_seconds: int):
         return TavusDashboardResponse(
             active_key=None,
             active_scenario=None,
@@ -103,8 +101,8 @@ class FakeTavusAdminService:
         self.begin_called = True
         return SimpleNamespace(
             rotation_id=uuid4(),
-            previous_tavus_api_key_id=uuid4(),
-            previous_tavus_preview_scenario_id=uuid4(),
+            previous_tavus_api_key_id=None,
+            previous_tavus_preview_scenario_id=None,
         )
 
     async def complete_rotation(
@@ -180,6 +178,7 @@ def test_admin_session_requires_sign_in():
 def test_admin_dashboard_returns_payload(monkeypatch):
     app.dependency_overrides[get_admin_auth_service] = lambda: FakeAdminAuthService()
     app.dependency_overrides[get_tavus_admin_service] = lambda: FakeTavusAdminService()
+    monkeypatch.setattr(admin_routes, "get_tavus_preview_max_duration_config", lambda: 300)
 
     try:
         client = create_client()
@@ -196,7 +195,7 @@ def test_admin_rotate_key_uses_fixed_replica(monkeypatch):
     fake_tavus_admin = FakeTavusAdminService()
     app.dependency_overrides[get_admin_auth_service] = lambda: FakeAdminAuthService()
     app.dependency_overrides[get_tavus_admin_service] = lambda: fake_tavus_admin
-    monkeypatch.setattr(admin_routes, "get_tavus_runtime_config", _runtime_settings)
+    monkeypatch.setattr(admin_routes, "get_tavus_admin_runtime_config", _runtime_settings)
     monkeypatch.setattr(admin_routes, "load_scenario_persona_config", _fake_scenario_config)
     monkeypatch.setattr(admin_routes, "create_persona", _fake_create_persona)
 
@@ -214,3 +213,34 @@ def test_admin_rotate_key_uses_fixed_replica(monkeypatch):
     payload = response.json()
     assert payload["persona_id"] == "persona_123"
     assert payload["replica_id"] == "r4ba1277e4fb"
+
+
+def test_admin_rotate_key_returns_config_error(monkeypatch):
+    app.dependency_overrides[get_admin_auth_service] = lambda: FakeAdminAuthService()
+    app.dependency_overrides[get_tavus_admin_service] = lambda: FakeTavusAdminService()
+    monkeypatch.setattr(admin_routes, "load_scenario_persona_config", _fake_scenario_config)
+    monkeypatch.setattr(
+        admin_routes,
+        "get_tavus_admin_runtime_config",
+        lambda: (_ for _ in ()).throw(
+            TavusConfigurationError(
+                "The Tavus API key encryption secret is not configured."
+            )
+        ),
+    )
+
+    try:
+        client = create_client()
+        client.cookies.set("dp_admin_access_token", "access-token")
+        response = client.post(
+            "/api/admin/tavus/rotate",
+            json={"api_key": "next-key", "label": "April rotation"},
+        )
+    finally:
+        app.dependency_overrides.clear()
+
+    assert response.status_code == 503
+    assert (
+        response.json()["detail"]
+        == "The Tavus API key encryption secret is not configured."
+    )

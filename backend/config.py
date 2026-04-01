@@ -151,9 +151,25 @@ def get_supabase_settings() -> SupabaseSettings:
 
 
 def get_tavus_runtime_settings() -> TavusRuntimeSettings:
+    return _get_tavus_runtime_settings(require_preview_enabled=True)
+
+
+def get_tavus_admin_runtime_settings() -> TavusRuntimeSettings:
+    return _get_tavus_runtime_settings(require_preview_enabled=False)
+
+
+def get_tavus_preview_max_duration_seconds() -> int:
     load_environment()
 
-    if not _read_bool("TAVUS_PREVIEW_ENABLED", True):
+    return _read_int("TAVUS_PREVIEW_MAX_DURATION_SECONDS", 300, minimum=30)
+
+
+def _get_tavus_runtime_settings(
+    *, require_preview_enabled: bool
+) -> TavusRuntimeSettings:
+    load_environment()
+
+    if require_preview_enabled and not _read_bool("TAVUS_PREVIEW_ENABLED", True):
         raise TavusConfigurationError("The live preview is currently disabled.")
 
     return TavusRuntimeSettings(
@@ -171,9 +187,7 @@ def get_tavus_runtime_settings() -> TavusRuntimeSettings:
         request_timeout_seconds=_read_float(
             "TAVUS_REQUEST_TIMEOUT_SECONDS", 20.0, minimum=1.0
         ),
-        preview_max_duration_seconds=_read_int(
-            "TAVUS_PREVIEW_MAX_DURATION_SECONDS", 300, minimum=30
-        ),
+        preview_max_duration_seconds=get_tavus_preview_max_duration_seconds(),
         api_key_encryption_key=os.getenv("TAVUS_API_KEY_ENCRYPTION_KEY", "").strip()
         or (_raise_tavus_encryption_error()),
     )

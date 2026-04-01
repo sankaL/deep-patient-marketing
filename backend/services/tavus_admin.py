@@ -29,8 +29,8 @@ class ExhaustedPreviewDenial:
 @dataclass(frozen=True)
 class RotationContext:
     rotation_id: UUID
-    previous_tavus_api_key_id: UUID
-    previous_tavus_preview_scenario_id: UUID
+    previous_tavus_api_key_id: UUID | None
+    previous_tavus_preview_scenario_id: UUID | None
 
 
 class TavusAdminService:
@@ -38,16 +38,15 @@ class TavusAdminService:
         self._supabase = supabase
 
     async def get_dashboard(
-        self, *, preview_max_duration_seconds: int, api_key_encryption_key: str
+        self, *, preview_max_duration_seconds: int
     ) -> TavusDashboardResponse:
         now = datetime.now(timezone.utc).isoformat()
         runtime_row = (
             await self._supabase.rpc(
-                "get_tavus_preview_runtime",
+                "get_tavus_preview_dashboard_runtime",
                 {
                     "p_now": now,
                     "p_cap_duration_seconds": preview_max_duration_seconds,
-                    "p_encryption_key": api_key_encryption_key,
                 },
             )
         ).first()
@@ -137,9 +136,15 @@ class TavusAdminService:
 
         return RotationContext(
             rotation_id=UUID(str(row["rotation_id"])),
-            previous_tavus_api_key_id=UUID(str(row["previous_tavus_api_key_id"])),
-            previous_tavus_preview_scenario_id=UUID(
-                str(row["previous_tavus_preview_scenario_id"])
+            previous_tavus_api_key_id=(
+                UUID(str(row["previous_tavus_api_key_id"]))
+                if row.get("previous_tavus_api_key_id")
+                else None
+            ),
+            previous_tavus_preview_scenario_id=(
+                UUID(str(row["previous_tavus_preview_scenario_id"]))
+                if row.get("previous_tavus_preview_scenario_id")
+                else None
             ),
         )
 

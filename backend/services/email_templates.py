@@ -2,12 +2,8 @@ from __future__ import annotations
 
 import html
 from dataclasses import dataclass
-from urllib.parse import urljoin
 
 from config import NotificationSettings
-
-
-EMAIL_LOGO_PATH = "/brand/deeppatient-logo-white-160.png"
 
 
 @dataclass(frozen=True)
@@ -33,10 +29,6 @@ def render_marketing_email(
     cta_url: str | None = None,
     closing: str | None = None,
 ) -> RenderedEmail:
-    logo_src = urljoin(
-        settings.marketing_site_url.rstrip("/") + "/",
-        EMAIL_LOGO_PATH.lstrip("/"),
-    )
     safe_eyebrow = html.escape(eyebrow)
     safe_title = html.escape(title)
     safe_intro = _escape_paragraph(intro)
@@ -81,13 +73,11 @@ def render_marketing_email(
         "<div style=\"max-width: 620px; margin: 0 auto; border-radius: 28px; "
         "overflow: hidden; background: linear-gradient(180deg, #1C2B2D 0%, #202F31 100%);\">"
         "<div style=\"padding: 28px 32px 24px;\">"
-        "<table role=\"presentation\" cellspacing=\"0\" cellpadding=\"0\" "
-        "style=\"border-collapse: collapse;\"><tr>"
-        f"<td style=\"vertical-align: middle;\"><img src=\"{html.escape(logo_src, quote=True)}\" "
-        "alt=\"Deep Patient\" style=\"display: block; width: 52px; height: 51px; border: 0;\" /></td>"
-        "<td style=\"vertical-align: middle; padding-left: 12px; color: #FFFFFF; font-size: 26px; "
-        "font-weight: 700; line-height: 1; font-family: Arial, sans-serif;\">Deep Patient</td>"
-        "</tr></table>"
+        "<div style=\"font-size: 26px; font-weight: 700; line-height: 1; "
+        "font-family: Arial, sans-serif;\">"
+        "<span style=\"color: #F9D38B;\">Deep</span>"
+        "<span style=\"color: #FFFFFF;\">Patient</span>"
+        "</div>"
         f"<div style=\"margin-top: 22px; color: #F9D38B; font-size: 12px; font-weight: 700; "
         "letter-spacing: 0.18em; text-transform: uppercase;\">"
         f"{safe_eyebrow}</div>"
