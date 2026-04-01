@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "motion/react";
 export interface ContactFormData {
   name: string;
   email: string;
+  institution?: string;
   teamSize?: string;
 }
 
@@ -43,18 +44,22 @@ export function ContactModal({
 }: ContactModalProps) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [institution, setInstitution] = useState("");
   const [teamSize, setTeamSize] = useState("");
   const [errors, setErrors] = useState<{ name?: string; email?: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const resetState = () => {
     setName("");
     setEmail("");
+    setInstitution("");
     setTeamSize("");
     setErrors({});
     setIsSubmitting(false);
     setIsSuccess(false);
+    setSubmitError(null);
   };
 
   useEffect(() => {
@@ -75,17 +80,25 @@ export function ContactModal({
     }
 
     setIsSubmitting(true);
+    setSubmitError(null);
 
     try {
       await onSubmit({
         name: name.trim(),
         email: email.trim(),
+        institution: institution.trim() || undefined,
         teamSize: teamSize.trim() || undefined,
       });
 
       if (showSuccessState) {
         setIsSuccess(true);
       }
+    } catch (error) {
+      setSubmitError(
+        error instanceof Error && error.message
+          ? error.message
+          : "Something went wrong. Please try again.",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -184,6 +197,22 @@ export function ContactModal({
 
                 <div className="space-y-1">
                   <label className="text-xs font-semibold uppercase tracking-wider text-brand-forest/50">
+                    Institution{" "}
+                    <span className="font-normal normal-case tracking-normal text-brand-forest/30">
+                      (optional)
+                    </span>
+                  </label>
+                  <input
+                    type="text"
+                    value={institution}
+                    onChange={(e) => setInstitution(e.target.value)}
+                    placeholder="University or organization"
+                    className="w-full rounded-xl border border-brand-forest/12 bg-brand-cream-dark/40 px-4 py-2.5 text-sm text-brand-forest placeholder:text-brand-forest/30 focus:border-[#F2B027]/60 focus:outline-none focus:ring-2 focus:ring-[#F2B027]/20"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-brand-forest/50">
                     Team Size{" "}
                     <span className="font-normal normal-case tracking-normal text-brand-forest/30">
                       (optional)
@@ -197,6 +226,10 @@ export function ContactModal({
                     className="w-full rounded-xl border border-brand-forest/12 bg-brand-cream-dark/40 px-4 py-2.5 text-sm text-brand-forest placeholder:text-brand-forest/30 focus:border-[#F2B027]/60 focus:outline-none focus:ring-2 focus:ring-[#F2B027]/20"
                   />
                 </div>
+
+                {submitError ? (
+                  <p className="text-sm text-red-600">{submitError}</p>
+                ) : null}
 
                 <div className="flex gap-3 pt-2">
                   <button

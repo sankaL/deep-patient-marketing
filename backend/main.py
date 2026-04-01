@@ -1,156 +1,33 @@
-"""
-DeepPatient Marketing — Backend API
-FastAPI + Resend + Tavus preview handling
-"""
+from __future__ import annotations
 
-import os
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, EmailStr
 
-from config import load_environment
+from config import get_allowed_origins, load_environment
+from routes.public import router as public_router
 from routes.tavus import router as tavus_router
 
-try:
-    import resend
-except ImportError:
-    resend = None  # type: ignore
 
-load_environment()
+def create_app() -> FastAPI:
+    load_environment()
 
-app = FastAPI(title="DeepPatient Marketing API", version="1.0.0")
-
-
-def get_allowed_origins() -> list[str]:
-    configured_origins = os.getenv("BACKEND_CORS_ORIGINS", "").strip()
-    if configured_origins:
-        return [origin.strip() for origin in configured_origins.split(",") if origin.strip()]
-
-    return [
-        "http://localhost:5173",
-        "http://localhost:3000",
-        "http://127.0.0.1:5173",
-    ]
-
-# ── CORS ──
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=get_allowed_origins(),
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-app.include_router(tavus_router)
-
-# ── Resend config ──
-RESEND_API_KEY = os.getenv("RESEND_API_KEY", "")
-FROM_EMAIL = os.getenv("FROM_EMAIL", "hello@deeppatient.com")
-ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "team@deeppatient.com")
-
-if resend and RESEND_API_KEY:
-    resend.api_key = RESEND_API_KEY
+    app = FastAPI(title="DeepPatient Marketing API", version="1.0.0")
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=get_allowed_origins(),
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+    app.include_router(public_router)
+    app.include_router(tavus_router)
+    return app
 
 
-# ── Models ──
-class SubscribeRequest(BaseModel):
-    email: EmailStr
-
-
-class DemoRequest(BaseModel):
-    name: str
-    email: EmailStr
-    institution: str = ""
-    message: str = ""
-
-
-# ── Endpoints ──
-@app.get("/api/health")
-def health_check():
-    return {"status": "ok", "service": "deeppatient-marketing"}
-
-
-@app.post("/api/subscribe")
-async def subscribe(payload: SubscribeRequest):
-    """Newsletter subscription — sends a welcome email via Resend."""
-    if not resend or not RESEND_API_KEY:
-        # In development without Resend configured, just acknowledge
-        print(f"[DEV] Newsletter subscribe: {payload.email}")
-        return {"success": True, "message": "Subscribed (dev mode)"}
-
-    try:
-        resend.Emails.send(
-            {
-                "from": FROM_EMAIL,
-                "to": [payload.email],
-                "subject": "Welcome to DeepPatient!",
-                "html": """
-                <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
-                    <h2 style="color: #202F31;">Welcome to DeepPatient!</h2>
-                    <p style="color: #5C7066; line-height: 1.6;">
-                        Thanks for subscribing. You'll receive updates on clinical education,
-                        AI in medicine, and DeepPatient product news.
-                    </p>
-                    <p style="color: #5C7066;">— The DeepPatient Team</p>
-                </div>
-                """,
-            }
-        )
-        return {"success": True, "message": "Subscribed successfully"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@app.post("/api/demo-request")
-async def demo_request(payload: DemoRequest):
-    """Demo request — notifies admin via Resend."""
-    if not resend or not RESEND_API_KEY:
-        print(f"[DEV] Demo request: {payload.name} <{payload.email}>")
-        return {"success": True, "message": "Demo request received (dev mode)"}
-
-    try:
-        # Notify admin
-        resend.Emails.send(
-            {
-                "from": FROM_EMAIL,
-                "to": [ADMIN_EMAIL],
-                "subject": f"New Demo Request — {payload.name}",
-                "html": f"""
-                <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
-                    <h2 style="color: #202F31;">New Demo Request</h2>
-                    <p><strong>Name:</strong> {payload.name}</p>
-                    <p><strong>Email:</strong> {payload.email}</p>
-                    <p><strong>Institution:</strong> {payload.institution or 'N/A'}</p>
-                    <p><strong>Message:</strong> {payload.message or 'N/A'}</p>
-                </div>
-                """,
-            }
-        )
-
-        # Confirmation to requester
-        resend.Emails.send(
-            {
-                "from": FROM_EMAIL,
-                "to": [payload.email],
-                "subject": "Your DeepPatient Demo Request",
-                "html": f"""
-                <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
-                    <h2 style="color: #202F31;">Thanks, {payload.name}!</h2>
-                    <p style="color: #5C7066; line-height: 1.6;">
-                        We've received your demo request and will be in touch within 24 hours.
-                    </p>
-                    <p style="color: #5C7066;">— The DeepPatient Team</p>
-                </div>
-                """,
-            }
-        )
-
-        return {"success": True, "message": "Demo request submitted"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+app = create_app()
 
 
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

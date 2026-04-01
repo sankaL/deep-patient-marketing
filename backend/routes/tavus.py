@@ -1,23 +1,35 @@
 from __future__ import annotations
 
+import logging
 from math import ceil
 from threading import Lock
 from time import monotonic
+from uuid import UUID
 
-from fastapi import APIRouter, HTTPException, Request, status
-from pydantic import BaseModel
+from fastapi import APIRouter, Body, Depends, HTTPException, Request, status
 
-from config import TavusConfigurationError, get_tavus_settings
-from services.tavus import TavusServiceError, create_conversation
+from config import TavusConfigurationError, TavusRuntimeSettings
+from dependencies import (
+    get_notification_service,
+    get_tavus_preview_state_service,
+    get_tavus_runtime_config,
+)
+from models.tavus import (
+    TavusConversationRequestBody,
+    TavusConversationResponse,
+    TavusPreviewSessionCompleteRequest,
+    TavusPreviewSessionCompleteResponse,
+    TavusPreviewRuntimeState,
+    TavusUsageRollup,
+)
+from services.notifications import NotificationService
+from services.supabase_client import SupabaseRestError
+from services.tavus import TavusServiceError, create_conversation, delete_conversation
+from services.tavus_state import TavusPreviewStateService
 
 
+logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/tavus", tags=["tavus"])
-
-
-class TavusConversationResponse(BaseModel):
-    conversation_id: str
-    conversation_url: str
-    status: str
 
 
 class PreviewLaunchGate:
@@ -72,14 +84,84 @@ def _get_client_id(request: Request) -> str:
     return "unknown"
 
 
+def _ensure_runtime_is_usable(runtime_state: TavusPreviewRuntimeState) -> None:
+    if runtime_state.scenario_status in {"disabled", "failed"}:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="The live preview is currently unavailable. Please try again later.",
+        )
+
+    if runtime_state.tavus_api_key_status in {"disabled", "failed", "rotating"}:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="The live preview is currently unavailable. Please try again later.",
+        )
+
+    if runtime_state.live_seconds_remaining_estimate <= 0 or runtime_state.tavus_api_key_status == "exhausted":
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="The live preview is currently at capacity. Please try again later.",
+        )
+
+
+async def _dispatch_low_quota_alerts(
+    *,
+    runtime_state_service: TavusPreviewStateService,
+    notifications: NotificationService,
+    rollups: list[TavusUsageRollup],
+    active_key_label: str | None = None,
+) -> None:
+    for rollup in rollups:
+        if (
+            rollup.low_quota_alert_sent_at is not None
+            or rollup.low_quota_threshold_seconds <= 0
+            or rollup.seconds_remaining_estimate > rollup.low_quota_threshold_seconds
+            or rollup.tavus_api_key_status == "disabled"
+        ):
+            continue
+
+        try:
+            result = await notifications.send_low_quota_alert(
+                key_label=active_key_label or "Active Tavus key",
+                rollup=rollup,
+            )
+        except Exception:
+            logger.exception(
+                "Low quota reminder failed.",
+                extra={"tavus_api_key_id": str(rollup.tavus_api_key_id)},
+            )
+            continue
+
+        if result.sent and result.sent_at is not None:
+            try:
+                await runtime_state_service.mark_low_quota_alert_sent(
+                    tavus_api_key_id=rollup.tavus_api_key_id,
+                    sent_at=result.sent_at,
+                )
+            except SupabaseRestError:
+                logger.exception(
+                    "Persisting low quota alert timestamp failed.",
+                    extra={"tavus_api_key_id": str(rollup.tavus_api_key_id)},
+                )
+
+
 @router.post(
     "/conversation",
     response_model=TavusConversationResponse,
     status_code=status.HTTP_201_CREATED,
 )
-async def start_tavus_conversation(request: Request) -> TavusConversationResponse:
+async def start_tavus_conversation(
+    request: Request,
+    payload: TavusConversationRequestBody | None = Body(default=None),
+    runtime_state_service: TavusPreviewStateService = Depends(
+        get_tavus_preview_state_service
+    ),
+    notifications: NotificationService = Depends(get_notification_service),
+) -> TavusConversationResponse:
+    payload = payload or TavusConversationRequestBody()
+
     try:
-        settings = get_tavus_settings()
+        runtime_settings = get_tavus_runtime_config()
     except TavusConfigurationError as exc:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -87,7 +169,7 @@ async def start_tavus_conversation(request: Request) -> TavusConversationRespons
         ) from exc
 
     retry_after = preview_launch_gate.check_and_record(
-        _get_client_id(request), settings.preview_cooldown_seconds
+        _get_client_id(request), runtime_settings.preview_cooldown_seconds
     )
     if retry_after > 0:
         raise HTTPException(
@@ -99,12 +181,119 @@ async def start_tavus_conversation(request: Request) -> TavusConversationRespons
         )
 
     try:
-        conversation = await create_conversation(settings)
+        expired_rollups = await runtime_state_service.close_expired_preview_sessions(
+            preview_max_duration_seconds=runtime_settings.preview_max_duration_seconds
+        )
+        runtime_state = await runtime_state_service.get_runtime_state(
+            preview_max_duration_seconds=runtime_settings.preview_max_duration_seconds
+        )
+    except SupabaseRestError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail="The live preview is currently unavailable. Please try again later.",
+        ) from exc
+
+    if runtime_state is None:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="The live preview is not configured yet.",
+        )
+
+    _ensure_runtime_is_usable(runtime_state)
+
+    await _dispatch_low_quota_alerts(
+        runtime_state_service=runtime_state_service,
+        notifications=notifications,
+        rollups=expired_rollups,
+        active_key_label=runtime_state.api_key_label,
+    )
+
+    conversation = None
+    try:
+        conversation = await create_conversation(runtime_state, runtime_settings)
+        preview_session = await runtime_state_service.create_preview_session(
+            runtime_state=runtime_state,
+            conversation_id=conversation.conversation_id,
+            demo_request_id=payload.demo_request_id,
+        )
     except TavusServiceError as exc:
         raise HTTPException(status_code=exc.status_code, detail=str(exc)) from exc
+    except SupabaseRestError as exc:
+        if conversation is not None:
+            try:
+                await delete_conversation(
+                    runtime_state,
+                    runtime_settings,
+                    conversation_id=conversation.conversation_id,
+                )
+            except TavusServiceError:
+                logger.exception(
+                    "Tavus conversation cleanup failed after preview session persistence error.",
+                    extra={"conversation_id": conversation.conversation_id},
+                )
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail="The live preview could not be started right now. Please try again later.",
+        ) from exc
 
     return TavusConversationResponse(
         conversation_id=conversation.conversation_id,
         conversation_url=conversation.conversation_url,
         status=conversation.status,
+        preview_session_id=preview_session.preview_session_id,
+    )
+
+
+@router.post(
+    "/preview-sessions/{preview_session_id}/complete",
+    response_model=TavusPreviewSessionCompleteResponse,
+)
+async def complete_tavus_preview_session(
+    preview_session_id: UUID,
+    payload: TavusPreviewSessionCompleteRequest,
+    runtime_state_service: TavusPreviewStateService = Depends(
+        get_tavus_preview_state_service
+    ),
+    notifications: NotificationService = Depends(get_notification_service),
+) -> TavusPreviewSessionCompleteResponse:
+    try:
+        runtime_settings = get_tavus_runtime_config()
+    except TavusConfigurationError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=str(exc),
+        ) from exc
+
+    try:
+        expired_rollups = await runtime_state_service.close_expired_preview_sessions(
+            preview_max_duration_seconds=runtime_settings.preview_max_duration_seconds
+        )
+        completion = await runtime_state_service.complete_preview_session(
+            preview_session_id=preview_session_id,
+            end_reason=payload.end_reason,
+            preview_max_duration_seconds=runtime_settings.preview_max_duration_seconds,
+        )
+    except SupabaseRestError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail="The live preview session could not be completed right now.",
+        ) from exc
+
+    if completion is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="The live preview session was not found.",
+        )
+
+    await _dispatch_low_quota_alerts(
+        runtime_state_service=runtime_state_service,
+        notifications=notifications,
+        rollups=[*expired_rollups, completion.rollup],
+    )
+
+    return TavusPreviewSessionCompleteResponse(
+        preview_session_id=completion.preview_session_id,
+        already_completed=completion.already_completed,
+        duration_seconds_estimate=completion.duration_seconds_estimate,
+        end_reason=completion.end_reason,
     )

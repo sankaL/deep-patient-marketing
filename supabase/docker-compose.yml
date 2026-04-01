@@ -1,0 +1,75 @@
+services:
+  backend:
+    depends_on:
+      supabase-bootstrap:
+        condition: service_completed_successfully
+    environment:
+      SUPABASE_MODE: local
+      SUPABASE_URL: http://supabase-gateway:8000
+      SUPABASE_SERVICE_ROLE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoic2VydmljZV9yb2xlIiwiaXNzIjoiZGVlcHBhdGllbnQtbG9jYWwiLCJleHAiOjIwOTA0MjIxNzJ9.uRGH9GTk1z_PUYfkyC-SwKPBRCJedXoJxPw36270vDE
+
+  supabase-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    ports:
+      - "55432:5432"
+    volumes:
+      - supabase_db_data:/var/lib/postgresql/data
+      - ./supabase/init:/docker-entrypoint-initdb.d:ro
+
+  supabase-rest:
+    image: postgrest/postgrest:v12.2.12
+    depends_on:
+      supabase-bootstrap:
+        condition: service_completed_successfully
+    environment:
+      PGRST_DB_ANON_ROLE: anon
+      PGRST_DB_SCHEMA: public
+      PGRST_DB_URI: postgres://authenticator:authenticator@supabase-db:5432/postgres
+      PGRST_DB_USE_LEGACY_GUCS: "false"
+      PGRST_JWT_SECRET: local-development-jwt-secret-for-deeppatient-marketing
+      PGRST_SERVER_PROXY_URI: http://localhost:55431
+
+  supabase-gateway:
+    image: nginx:1.27-alpine
+    depends_on:
+      supabase-rest:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8000/health >/dev/null"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    ports:
+      - "55431:8000"
+    volumes:
+      - ./supabase/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+
+  supabase-bootstrap:
+    image: postgres:16-alpine
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+    env_file:
+      - ./backend/.env
+    environment:
+      PGDATABASE: postgres
+      PGHOST: supabase-db
+      PGPASSWORD: postgres
+      PGPORT: "5432"
+      PGUSER: postgres
+    restart: "no"
+    volumes:
+      - ./supabase:/workspace/supabase:ro
+    command: ["/bin/sh", "/workspace/supabase/scripts/bootstrap.sh"]
+
+volumes:
+  supabase_db_data:

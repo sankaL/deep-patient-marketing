@@ -88,7 +88,11 @@ const emptyForm: FormData = {
   message: "",
 };
 
-const PricingSection = () => {
+type PricingSectionProps = {
+  onBookDemo: () => void;
+};
+
+const PricingSection = ({ onBookDemo }: PricingSectionProps) => {
   const [form, setForm] = useState<FormData>(emptyForm);
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -396,13 +400,14 @@ const PricingSection = () => {
           className="text-center"
         >
           <p className="text-gray-500 text-sm mb-3">Not ready for a proposal yet?</p>
-          <a
-            href="#"
+          <button
+            type="button"
+            onClick={onBookDemo}
             className="inline-flex items-center gap-2 text-brand-sage font-medium text-sm hover:underline underline-offset-4"
           >
             Book a Demo
             <ArrowRight className="h-4 w-4" />
-          </a>
+          </button>
         </motion.div>
       </div>
     </section>

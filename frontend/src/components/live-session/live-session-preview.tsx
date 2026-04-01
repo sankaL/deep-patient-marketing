@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Activity,
   AlertCircle,
@@ -17,6 +17,7 @@ import { motion } from "motion/react";
 
 import { Conversation } from "@/components/cvi/components/conversation";
 import replicaImg from "@/assets/replica-2.png";
+import { submitDemoRequest } from "@/lib/leads";
 
 import { ContactModal } from "./contact-modal";
 import { useTavusPreview } from "./use-tavus-preview";
@@ -170,19 +171,45 @@ function PreviewStat({
 }
 
 export function LiveSessionPreview() {
-  const { conversationUrl, errorMessage, isActive, isLoading, resetSession, startSession } =
-    useTavusPreview();
+  const {
+    completeSession,
+    conversationUrl,
+    errorMessage,
+    isActive,
+    isLoading,
+    previewSessionId,
+    resetSession,
+    startSession,
+  } = useTavusPreview();
   const contactModalEnabled = import.meta.env.VITE_CONTACT_MODAL_ENABLED !== "false";
   const [showModal, setShowModal] = useState(false);
+
+  useEffect(() => {
+    if (!previewSessionId || !isActive || !navigator.sendBeacon) {
+      return;
+    }
+
+    const handlePageHide = () => {
+      const body = JSON.stringify({ end_reason: "window_unload" });
+      navigator.sendBeacon(
+        `/api/tavus/preview-sessions/${previewSessionId}/complete`,
+        new Blob([body], { type: "application/json" }),
+      );
+    };
+
+    window.addEventListener("pagehide", handlePageHide);
+    return () => window.removeEventListener("pagehide", handlePageHide);
+  }, [isActive, previewSessionId]);
 
   const handleContactSubmit = async (formData: {
     name: string;
     email: string;
+    institution?: string;
     teamSize?: string;
   }) => {
-    void formData;
+    const demoRequestId = await submitDemoRequest(formData, "live_preview");
     setShowModal(false);
-    await startSession();
+    await startSession({ demoRequestId });
   };
 
   return (
@@ -216,7 +243,13 @@ export function LiveSessionPreview() {
                 One scenario • short preview access
               </p>
             </div>
-            <Conversation conversationUrl={conversationUrl} onLeave={resetSession} />
+            <Conversation
+              conversationUrl={conversationUrl}
+              onLeave={() => {
+                void completeSession("client_closed");
+                resetSession();
+              }}
+            />
           </div>
         ) : (
           <div className="grid min-h-[480px] md:grid-cols-[minmax(0,1.4fr)_240px]">
@@ -247,7 +280,9 @@ export function LiveSessionPreview() {
                 <div className="flex flex-col gap-3 sm:flex-row">
                   <button
                     type="button"
-                    onClick={() => contactModalEnabled ? setShowModal(true) : startSession()}
+                    onClick={() =>
+                      contactModalEnabled ? setShowModal(true) : startSession()
+                    }
                     disabled={isLoading}
                     className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-success px-8 text-base font-semibold text-white shadow-[0_0_32px_hsl(120,41%,30%,0.28)] transition-all hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-65"
                   >

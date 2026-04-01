@@ -10,6 +10,7 @@ import { PersonasSection } from "@/sections/personas-section";
 import { PricingSection } from "@/sections/pricing-section";
 import { FooterCtaSection } from "@/sections/footer-cta-section";
 import { Footer } from "@/sections/footer";
+import { submitDemoRequest } from "@/lib/leads";
 
 function App() {
   const [demoRequestId, setDemoRequestId] = useState(0);
@@ -20,8 +21,7 @@ function App() {
   };
 
   const handleDemoSubmit = async (_data: ContactFormData) => {
-    void _data;
-    await Promise.resolve();
+    await submitDemoRequest(_data, "book_demo");
   };
 
   return (
@@ -38,7 +38,7 @@ function App() {
       <IntroVideoSection demoRequestId={demoRequestId} />
       <FeaturesSection />
       <PersonasSection onBookDemo={handleBookDemo} />
-      <PricingSection />
+      <PricingSection onBookDemo={handleBookDemo} />
       <FooterCtaSection onBookDemo={handleBookDemo} />
       <Footer />
       <ContactModal
