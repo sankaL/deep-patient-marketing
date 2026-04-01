@@ -7,15 +7,17 @@ import logoWhite from "@/assets/brand/deeppatient-logo-white.svg";
 import { LiveSessionPreview } from "@/components/live-session/live-session-preview";
 import { HeroShapes } from "@/components/ui/shape-landing-hero";
 
-/* ══════════════════════════════════════════════
-   ║            HERO SECTION                   ║
-   ══════════════════════════════════════════════ */
-const HeroSection = () => {
+type HeroSectionProps = {
+  onBookDemo: () => void;
+  onWatchDemo: () => void;
+};
+
+const HeroSection = ({ onBookDemo, onWatchDemo }: HeroSectionProps) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#030303]">
-      {/* Gradient background — warm gold + forest glow - GPU-accelerated */}
+      {/* Gradient background */}
       <div className="absolute inset-0 bg-gradient-to-br from-[hsl(38,92%,76%)]/[0.04] via-transparent to-[hsl(26,40%,39%)]/[0.04]" />
       <div className="flex flex-col items-end absolute -right-60 -top-10 z-0 [will-change:transform] [transform:translateZ(0)]">
         <div className="h-[10rem] rounded-full w-[60rem] z-1 bg-gradient-to-b blur-[3rem] from-[hsl(38,92%,76%)]/30 to-[hsl(187,21%,16%)]/20 [will-change:transform] [transform:translateZ(0)]"></div>
@@ -24,22 +26,18 @@ const HeroSection = () => {
       </div>
       <div className="absolute inset-0 z-0 bg-noise opacity-30 [will-change:opacity]"></div>
 
-      {/* ── Elegant floating shapes ── */}
       <HeroShapes />
 
-      {/* Fade overlay at top/bottom — bottom blends into the features section teal over a tall area */}
       <div className="absolute inset-0 bg-gradient-to-t from-[hsl(187,21%,10%)] via-[hsl(187,21%,10%)]/20 to-[#030303]/80 pointer-events-none z-[1]" style={{backgroundSize:'100% 100%'}} />
 
-      {/* Blue-teal smudge for section transition — behind all content */}
       <div className="absolute bottom-0 left-0 right-0 h-[55%] pointer-events-none z-[2]" aria-hidden="true">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[hsl(187,30%,10%)]/40 to-[hsl(187,21%,10%)]" />
         <div className="absolute left-1/2 -translate-x-1/2 bottom-0 w-[80rem] h-72 bg-[hsl(187,60%,25%)]/12 blur-[10rem] rounded-full" />
         <div className="absolute left-1/2 -translate-x-1/2 bottom-8 w-[40rem] h-40 bg-[hsl(187,70%,40%)]/6 blur-[8rem] rounded-full" />
       </div>
 
-      {/* Content container */}
       <div className="relative z-10">
-        {/* ── Navigation ── */}
+        {/* Navigation */}
         <nav className="container mx-auto flex items-center justify-between px-4 py-4 mt-6">
           <div className="flex items-center gap-3">
             <img src={logoWhite} alt="DeepPatient" className="h-8 w-8" />
@@ -51,13 +49,15 @@ const HeroSection = () => {
           {/* Desktop */}
           <div className="hidden md:flex items-center space-x-6">
             <div className="flex items-center space-x-6">
-              <NavItem label="Features" hasDropdown />
-              <NavItem label="Pricing" />
-              <NavItem label="About" />
-              <NavItem label="Resources" hasDropdown />
+              <NavItem label="Features" href="#features" />
+              <NavItem label="Pricing" href="#pricing" />
             </div>
             <div className="flex items-center space-x-3">
-              <button className="h-11 rounded-full bg-brand-sage px-7 text-sm font-semibold text-brand-forest-dark hover:brightness-105 transition-all cursor-pointer shadow-[0_0_24px_hsl(38,92%,76%,0.25)]">
+              <button
+                type="button"
+                onClick={onBookDemo}
+                className="h-11 rounded-full bg-brand-sage px-7 text-sm font-semibold text-brand-forest-dark hover:brightness-105 transition-all cursor-pointer shadow-[0_0_24px_hsl(38,92%,76%,0.28)]"
+              >
                 Book a Demo
               </button>
             </div>
@@ -77,7 +77,7 @@ const HeroSection = () => {
           </button>
         </nav>
 
-        {/* ── Mobile Navigation ── */}
+        {/* Mobile Navigation */}
         <AnimatePresence>
           {mobileMenuOpen && (
             <motion.div
@@ -99,12 +99,17 @@ const HeroSection = () => {
                 </button>
               </div>
               <div className="mt-8 flex flex-col space-y-6">
-                <MobileNavItem label="Features" />
-                <MobileNavItem label="Pricing" />
-                <MobileNavItem label="About" />
-                <MobileNavItem label="Resources" />
+                <MobileNavItem label="Features" href="#features" onNavigate={() => setMobileMenuOpen(false)} />
+                <MobileNavItem label="Pricing" href="#pricing" onNavigate={() => setMobileMenuOpen(false)} />
                 <div className="pt-4">
-                  <button className="w-full h-12 rounded-full bg-brand-sage px-8 text-base font-semibold text-brand-forest-dark hover:brightness-105 transition-all cursor-pointer">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      onBookDemo();
+                    }}
+                    className="w-full h-12 rounded-full bg-brand-sage px-8 text-base font-semibold text-brand-forest-dark hover:brightness-105 transition-all cursor-pointer shadow-[0_0_24px_hsl(38,92%,76%,0.28)]"
+                  >
                     Book a Demo
                   </button>
                 </div>
@@ -113,7 +118,7 @@ const HeroSection = () => {
           )}
         </AnimatePresence>
 
-        {/* ── Badge ── */}
+        {/* Badge */}
         <div className="mx-auto mt-8 flex max-w-fit items-center justify-center space-x-2 rounded-full border border-white/[0.08] bg-white/[0.03] px-5 py-2.5 backdrop-blur-sm">
           <span className="text-sm font-medium text-brand-sage">
             Scalable practice. Measurable outcomes.
@@ -121,7 +126,7 @@ const HeroSection = () => {
           <ArrowRight className="h-4 w-4 text-brand-sage" />
         </div>
 
-        {/* ── Hero Copy ── */}
+        {/* Hero Copy */}
         <div className="container mx-auto mt-10 px-4 text-center">
           <motion.h1
             initial={{ opacity: 0, y: 30 }}
@@ -155,10 +160,18 @@ const HeroSection = () => {
             transition={{ duration: 1, delay: 0.7, ease: [0.25, 0.4, 0.25, 1] }}
             className="mt-10 flex flex-col items-center justify-center space-y-4 sm:flex-row sm:space-x-4 sm:space-y-0"
           >
-            <button className="h-12 rounded-full bg-brand-sage px-8 text-base font-semibold text-brand-forest-dark hover:brightness-105 transition-all cursor-pointer shadow-[0_0_32px_hsl(38,92%,76%,0.3)]">
+            <button
+              type="button"
+              onClick={onBookDemo}
+              className="h-12 rounded-full bg-brand-sage px-8 text-base font-semibold text-brand-forest-dark hover:brightness-105 transition-all cursor-pointer shadow-[0_0_32px_hsl(38,92%,76%,0.32)]"
+            >
               Book a Demo
             </button>
-            <button className="h-12 rounded-full border border-gray-600 px-8 text-base font-medium text-white hover:bg-white/5 transition-all cursor-pointer">
+            <button
+              type="button"
+              onClick={onWatchDemo}
+              className="h-12 rounded-full border border-gray-600 px-8 text-base font-medium text-white hover:bg-white/5 transition-all cursor-pointer"
+            >
               Watch Demo
             </button>
           </motion.div>
@@ -169,43 +182,35 @@ const HeroSection = () => {
   );
 };
 
-/* ── Nav sub-components ── */
-function NavItem({
-  label,
-  hasDropdown,
-}: {
-  label: string;
-  hasDropdown?: boolean;
-}) {
+function NavItem({ label, href }: { label: string; href: string }) {
   return (
-    <div className="flex items-center text-sm text-gray-300 hover:text-white transition-colors cursor-pointer">
+    <a
+      href={href}
+      className="flex items-center text-sm text-gray-300 hover:text-white transition-colors cursor-pointer"
+    >
       <span>{label}</span>
-      {hasDropdown && (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="ml-1"
-        >
-          <path d="m6 9 6 6 6-6" />
-        </svg>
-      )}
-    </div>
+    </a>
   );
 }
 
-function MobileNavItem({ label }: { label: string }) {
+function MobileNavItem({
+  label,
+  href,
+  onNavigate,
+}: {
+  label: string;
+  href: string;
+  onNavigate?: () => void;
+}) {
   return (
-    <div className="flex items-center justify-between border-b border-gray-800 pb-2 text-lg text-white cursor-pointer">
+    <a
+      href={href}
+      onClick={onNavigate}
+      className="flex items-center justify-between border-b border-gray-800 pb-2 text-lg text-white cursor-pointer"
+    >
       <span>{label}</span>
       <ArrowRight className="h-4 w-4 text-gray-400" />
-    </div>
+    </a>
   );
 }
 

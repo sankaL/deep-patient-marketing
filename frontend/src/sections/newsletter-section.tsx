@@ -56,18 +56,19 @@ const NewsletterSection = () => {
               onChange={(e) => setEmail(e.target.value)}
               required
               className="flex-1 h-12 rounded-full border border-white/10 bg-white/5 px-5 text-white
-                         placeholder:text-gray-500 focus:outline-none focus:border-brand-sage/50
-                         focus:ring-2 focus:ring-brand-sage/20 transition-all text-sm"
+                         placeholder:text-gray-500 focus:outline-none focus:border-subscribe-cta/55
+                         focus:ring-2 focus:ring-subscribe-cta/20 transition-all text-sm"
             />
             <button
               type="submit"
               disabled={status === "loading"}
-              className="h-12 rounded-full bg-brand-sage px-6 text-sm font-semibold text-brand-forest-dark
+              className="h-12 rounded-full bg-subscribe-cta px-6 text-sm font-semibold text-white
                          hover:brightness-105 transition-all cursor-pointer disabled:opacity-60
+                         shadow-[0_0_24px_hsl(184,43%,40%,0.24)]
                          flex items-center justify-center gap-2 min-w-[130px]"
             >
               {status === "loading" ? (
-                <div className="h-4 w-4 border-2 border-brand-forest-dark/30 border-t-brand-forest-dark rounded-full animate-spin" />
+                <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
                 <>
                   Subscribe

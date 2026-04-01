@@ -3,11 +3,11 @@ import logoWhite from "@/assets/brand/deeppatient-logo-white.svg";
 const footerLinks = [
   {
     heading: "Product",
-    links: ["Features", "Pricing", "Demo", "Changelog"],
+    links: ["Features", "Pricing", "Demo"],
   },
   {
     heading: "Company",
-    links: ["About", "Blog", "Careers", "Contact"],
+    links: ["About", "Contact"],
   },
   {
     heading: "Legal",
@@ -58,7 +58,7 @@ const Footer = () => {
         {/* Bottom bar */}
         <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <span className="text-gray-600 text-xs">
-            © {year} DeepPatient. All rights reserved.
+            \u00A9 {year} DeepPatient. All rights reserved.
           </span>
           <div className="flex items-center gap-6">
             <a

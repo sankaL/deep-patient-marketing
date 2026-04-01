@@ -16,6 +16,8 @@
   --color-foreground: hsl(152 59% 5%);
   --color-muted-fg: hsl(152 10% 40%);
   --color-feedback-cta: hsl(40 89% 55%);
+  --color-subscribe-cta: hsl(184 43% 40%);
+  --color-faculty-pill: hsl(164 37% 55%);
   --color-destructive: hsl(0 86% 57%);
   --color-border: hsl(30 12% 85%);
   --color-success: hsl(120 41% 30%);
@@ -65,5 +67,37 @@
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
     font-weight: 700;
+  }
+}
+
+/* ── Form inputs (pricing form) ── */
+@layer components {
+  .form-input {
+    width: 100%;
+    height: 2.75rem;
+    border-radius: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.05);
+    padding-left: 1rem;
+    padding-right: 1rem;
+    color: white;
+    font-size: 0.875rem;
+    outline: none;
+    transition: all 0.15s;
+  }
+  .form-input::placeholder {
+    color: rgba(156, 163, 175, 0.5);
+  }
+  .form-input:focus {
+    border-color: hsla(38, 92%, 76%, 0.45);
+    box-shadow: 0 0 0 2px hsla(38, 92%, 76%, 0.12);
+  }
+  textarea.form-input {
+    height: auto;
+    padding-top: 0.625rem;
+    padding-bottom: 0.625rem;
+  }
+  select.form-input {
+    cursor: pointer;
   }
 }

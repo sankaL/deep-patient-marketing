@@ -1,7 +1,11 @@
 import { ArrowRight } from "lucide-react";
 import { motion } from "motion/react";
 
-const FooterCtaSection = () => {
+type FooterCtaSectionProps = {
+  onBookDemo: () => void;
+};
+
+const FooterCtaSection = ({ onBookDemo }: FooterCtaSectionProps) => {
   return (
     <section className="relative py-24 md:py-32 bg-black overflow-hidden">
       {/* Background glow */}
@@ -24,7 +28,11 @@ const FooterCtaSection = () => {
         <p className="text-gray-400 text-lg max-w-2xl mx-auto mb-10">
           All at a fraction of the cost of live standardized patients.
         </p>
-        <button className="inline-flex items-center gap-2 h-14 rounded-full bg-brand-sage px-10 text-base font-semibold text-brand-forest-dark hover:brightness-105 transition-all cursor-pointer shadow-[0_0_40px_hsl(38,92%,76%,0.3)]">
+        <button
+          type="button"
+          onClick={onBookDemo}
+          className="inline-flex items-center gap-2 h-14 rounded-full bg-brand-sage px-10 text-base font-semibold text-brand-forest-dark hover:brightness-105 transition-all cursor-pointer shadow-[0_0_40px_hsl(38,92%,76%,0.34)]"
+        >
           Book a Demo
           <ArrowRight className="h-5 w-5" />
         </button>

@@ -19,7 +19,7 @@ const personas = [
     label: "For Faculty",
     headline: "Assign, Track, and Identify Cohort-Level Gaps.",
     icon: GraduationCap,
-    color: "brand-sage",
+    color: "faculty-pill",
     items: [
       {
         icon: BookOpen,
@@ -80,26 +80,30 @@ const personas = [
 ];
 
 const tabColorMap: Record<string, string> = {
-  "brand-sage": "bg-brand-sage text-brand-forest-dark",
+  "faculty-pill": "bg-faculty-pill text-brand-forest-dark",
   "feedback-cta": "bg-feedback-cta text-brand-forest-dark",
   "brand-bark": "bg-brand-bark text-white",
 };
 
 const inactiveTabMap: Record<string, string> = {
-  "brand-sage": "text-brand-sage border-brand-sage/30 hover:bg-brand-sage/10",
+  "faculty-pill": "text-faculty-pill border-faculty-pill/30 hover:bg-faculty-pill/10",
   "feedback-cta":
     "text-feedback-cta border-feedback-cta/30 hover:bg-feedback-cta/10",
   "brand-bark": "text-brand-bark border-brand-bark/30 hover:bg-brand-bark/10",
 };
 
 const iconColorMap: Record<string, string> = {
-  "brand-sage": "text-brand-sage bg-brand-sage/10 border-brand-sage/20",
+  "faculty-pill": "text-faculty-pill bg-faculty-pill/10 border-faculty-pill/20",
   "feedback-cta":
     "text-feedback-cta bg-feedback-cta/10 border-feedback-cta/20",
   "brand-bark": "text-brand-bark bg-brand-bark/10 border-brand-bark/20",
 };
 
-const PersonasSection = () => {
+type PersonasSectionProps = {
+  onBookDemo: () => void;
+};
+
+const PersonasSection = ({ onBookDemo }: PersonasSectionProps) => {
   const [active, setActive] = useState("faculty");
   const current = personas.find((p) => p.id === active)!;
 
@@ -155,7 +159,7 @@ const PersonasSection = () => {
             transition={{ duration: 0.35 }}
             className="max-w-2xl mx-auto"
           >
-            <div className="rounded-2xl border border-white/8 bg-white/[0.03] backdrop-blur-sm p-8 md:p-10">
+            <div className="rounded-2xl border border-white/8 bg-white/[0.03] p-8 backdrop-blur-sm md:p-10">
               <h3 className="text-2xl font-bold text-white mb-6">
                 {current.headline}
               </h3>
@@ -181,8 +185,12 @@ const PersonasSection = () => {
                 ))}
               </ul>
 
-              <div className="mt-8">
-                <button className="inline-flex items-center gap-2 h-11 rounded-full bg-brand-sage px-7 text-sm font-semibold text-brand-forest-dark hover:brightness-105 transition-all cursor-pointer">
+              <div className="mt-8 flex justify-end">
+                <button
+                  type="button"
+                  onClick={onBookDemo}
+                  className="inline-flex items-center gap-2 h-11 rounded-full bg-brand-sage px-7 text-sm font-semibold text-brand-forest-dark hover:brightness-105 transition-all cursor-pointer shadow-[0_0_24px_hsl(38,92%,76%,0.26)]"
+                >
                   Book a Demo
                   <ArrowRight className="h-4 w-4" />
                 </button>

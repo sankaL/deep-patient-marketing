@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Activity,
   AlertCircle,
@@ -15,7 +16,9 @@ import {
 import { motion } from "motion/react";
 
 import { Conversation } from "@/components/cvi/components/conversation";
+import replicaImg from "@/assets/replica-2.png";
 
+import { ContactModal } from "./contact-modal";
 import { useTavusPreview } from "./use-tavus-preview";
 
 function HeartRateSparkline() {
@@ -41,9 +44,9 @@ function PatientInfoPanel() {
         </div>
         <div>
           <p className="text-[11px] font-semibold leading-tight text-brand-forest">
-            Carlos Mendez
+            John Miller
           </p>
-          <p className="text-[9px] text-brand-forest/50">Male, 34</p>
+          <p className="text-[9px] text-brand-forest/50">Male, 31</p>
         </div>
       </div>
 
@@ -119,7 +122,7 @@ function PatientInfoPanel() {
               Chief Complaint
             </p>
             <p className="text-[11px] font-medium leading-snug text-brand-forest">
-              Persistent headache for 3 days
+              Low mood and loss of interest for 3 months
             </p>
           </div>
           <div className="h-px bg-brand-forest/6" />
@@ -128,7 +131,7 @@ function PatientInfoPanel() {
               History
             </p>
             <p className="text-[10px] leading-snug text-brand-forest/70">
-              No prior hx of migraines. Reports mild nausea with light sensitivity.
+              Recently divorced. Works as senior IT analyst. No prior depressive episodes.
             </p>
           </div>
         </div>
@@ -169,6 +172,18 @@ function PreviewStat({
 export function LiveSessionPreview() {
   const { conversationUrl, errorMessage, isActive, isLoading, resetSession, startSession } =
     useTavusPreview();
+  const contactModalEnabled = import.meta.env.VITE_CONTACT_MODAL_ENABLED !== "false";
+  const [showModal, setShowModal] = useState(false);
+
+  const handleContactSubmit = async (formData: {
+    name: string;
+    email: string;
+    teamSize?: string;
+  }) => {
+    void formData;
+    setShowModal(false);
+    await startSession();
+  };
 
   return (
     <motion.div
@@ -186,7 +201,7 @@ export function LiveSessionPreview() {
           <div className="h-3 w-3 rounded-full bg-[#FEBC2E] shadow-inner" />
           <div className="h-3 w-3 rounded-full bg-[#28C840] shadow-inner" />
           <span className="ml-3 text-[11px] font-medium text-black/40">
-            {isActive ? "DeepPatient — Tavus Live Preview" : "DeepPatient — Live Session"}
+            {isActive ? "DeepPatient — Live Preview" : "DeepPatient — Live Session"}
           </span>
         </div>
 
@@ -195,7 +210,7 @@ export function LiveSessionPreview() {
             <div className="mb-3 flex flex-col gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-left md:flex-row md:items-center md:justify-between">
               <div className="flex items-center gap-2 text-white">
                 <div className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-sm font-semibold">Tavus session live</span>
+                <span className="text-sm font-semibold">Live session active</span>
               </div>
               <p className="text-xs uppercase tracking-[0.18em] text-white/50">
                 One scenario • short preview access
@@ -205,22 +220,21 @@ export function LiveSessionPreview() {
           </div>
         ) : (
           <div className="grid min-h-[480px] md:grid-cols-[minmax(0,1.4fr)_240px]">
-            <div className="flex flex-col justify-between bg-[radial-gradient(circle_at_top_left,_rgba(245,215,132,0.28),_rgba(255,255,255,0.96)_48%,_rgba(240,236,230,0.92)_100%)] p-6 text-left md:p-10">
-              <div>
+            <div className="relative flex flex-col justify-between overflow-hidden p-6 text-left md:p-10">
+              <div
+                className="absolute inset-0 bg-cover bg-center"
+                style={{ backgroundImage: `url(${replicaImg})` }}
+              />
+              <div className="absolute inset-0 bg-white/90 backdrop-blur-2xl" />
+              <div className="relative z-10">
                 <div className="inline-flex items-center gap-2 rounded-full border border-brand-sage/40 bg-brand-sage/12 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-brand-forest">
                   <Video className="h-4 w-4 text-brand-bark" />
-                  Tavus Live Preview
+                  DeepPatient Live Preview
                 </div>
 
                 <h3 className="mt-5 max-w-2xl text-3xl font-semibold tracking-tight text-brand-forest md:text-4xl">
-                  Start a real AI patient conversation directly from the site.
+                  Start a real AI patient conversation.
                 </h3>
-
-                <p className="mt-4 max-w-2xl text-sm leading-7 text-brand-forest/72 md:text-base">
-                  The static mock has been replaced with a real Tavus-powered session. We keep
-                  it intentionally narrow: one scenario, a short preview window, and a fast path
-                  into a live encounter.
-                </p>
 
                 <div className="mt-8 grid gap-3 sm:grid-cols-3">
                   <PreviewStat icon={Clock3} label="Preview" value="2 to 5 minute live session" />
@@ -229,13 +243,13 @@ export function LiveSessionPreview() {
                 </div>
               </div>
 
-              <div className="mt-8">
+              <div className="relative z-10 mt-8">
                 <div className="flex flex-col gap-3 sm:flex-row">
                   <button
                     type="button"
-                    onClick={startSession}
+                    onClick={() => contactModalEnabled ? setShowModal(true) : startSession()}
                     disabled={isLoading}
-                    className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-brand-sage px-8 text-base font-semibold text-brand-forest-dark shadow-[0_0_32px_hsl(38,92%,76%,0.3)] transition-all hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-65"
+                    className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-success px-8 text-base font-semibold text-white shadow-[0_0_32px_hsl(120,41%,30%,0.28)] transition-all hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-65"
                   >
                     {isLoading ? (
                       <>
@@ -247,12 +261,6 @@ export function LiveSessionPreview() {
                     )}
                   </button>
 
-                  <a
-                    href="mailto:team@deeppatient.com?subject=DeepPatient%20Demo%20Request"
-                    className="inline-flex h-12 items-center justify-center rounded-full border border-brand-forest/12 px-8 text-base font-medium text-brand-forest transition-all hover:bg-brand-forest/5"
-                  >
-                    Book a Demo
-                  </a>
                 </div>
 
                 {errorMessage ? (
@@ -266,7 +274,7 @@ export function LiveSessionPreview() {
                 ) : null}
 
                 <p className="mt-4 text-xs leading-6 text-brand-forest/48">
-                  By starting the preview you will join a Tavus session and be prompted for
+                  By starting the preview you will join a live AI session and be prompted for
                   microphone and camera access.
                 </p>
               </div>
@@ -278,6 +286,16 @@ export function LiveSessionPreview() {
           </div>
         )}
       </div>
+      <ContactModal
+        open={showModal}
+        title="Before you start"
+        description="Share a few details to start the live AI patient session."
+        onClose={() => setShowModal(false)}
+        onSubmit={handleContactSubmit}
+        submitLabel="Start Session"
+        submittingLabel="Starting..."
+        submitButtonClassName="bg-success text-white shadow-[0_0_24px_hsl(120,41%,30%,0.28)]"
+      />
     </motion.div>
   );
 }
