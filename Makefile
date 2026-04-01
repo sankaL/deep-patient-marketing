@@ -1,4 +1,4 @@
-.PHONY: build check-env dev dev-local down logs ps stop
+.PHONY: build check-env dev dev-local down frontend-build logs ps stop
 
 SUPABASE_MODE_RAW := $(shell awk -F= '/^SUPABASE_MODE=/{print $$2}' backend/.env 2>/dev/null | tail -n1 | tr -d '\r')
 SUPABASE_MODE := $(if $(SUPABASE_MODE_RAW),$(SUPABASE_MODE_RAW),local)
@@ -10,11 +10,15 @@ LOCAL_SUPABASE_SERVICES := supabase-db supabase-rest supabase-gateway supabase-b
 build:
 	$(COMPOSE) build
 
+frontend-build:
+	@echo "Running frontend build..."
+	@cd frontend && npm run build
+
 check-env:
 	@test -f backend/.env || (echo "Missing backend/.env. Copy backend/.env.example to backend/.env before running make dev." && exit 1)
 
 # Docker-based development (default)
-dev: check-env stop
+dev: check-env frontend-build stop
 	$(COMPOSE) up --build
 
 # Local development without Docker

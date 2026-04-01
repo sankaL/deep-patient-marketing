@@ -25,15 +25,10 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-[hsl(187,21%,10%)]">
       <HeroSection
         onBookDemo={handleBookDemo}
         onWatchDemo={() => setDemoRequestId((id) => id + 1)}
-      />
-      {/* Bridge gradient */}
-      <div
-        className="relative -mt-48 h-48 pointer-events-none z-10 bg-gradient-to-b from-transparent to-[hsl(187,21%,10%)]"
-        aria-hidden="true"
       />
       <IntroVideoSection demoRequestId={demoRequestId} />
       <FeaturesSection />
