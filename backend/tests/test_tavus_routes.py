@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from types import SimpleNamespace
 from uuid import uuid4
 
@@ -52,6 +52,10 @@ def _runtime_state() -> TavusPreviewRuntimeState:
 
 
 class FakeNotificationService:
+    def __init__(self, *, exhausted_sent: bool = True) -> None:
+        self.exhausted_sent = exhausted_sent
+        self.exhausted_alert_calls = 0
+
     async def send_low_quota_alert(self, *, key_label: str, rollup: TavusUsageRollup):
         return SimpleNamespace(sent=False, sent_at=None)
 
@@ -64,7 +68,11 @@ class FakeNotificationService:
         request_email,
         request_institution,
     ):
-        return SimpleNamespace(sent=False, sent_at=None)
+        self.exhausted_alert_calls += 1
+        return SimpleNamespace(
+            sent=self.exhausted_sent,
+            sent_at=datetime.now(timezone.utc) if self.exhausted_sent else None,
+        )
 
 
 class FakeTavusPreviewStateService:
@@ -117,8 +125,10 @@ class FakeTavusPreviewStateService:
 
 
 class FakeTavusAdminService:
-    def __init__(self) -> None:
+    def __init__(self, *, should_send_sales_email_sequence: list[bool] | None = None) -> None:
         self.exhausted_denials = 0
+        self.should_send_sales_email_sequence = should_send_sales_email_sequence or [True]
+        self.marked_exhausted_alerts: list[tuple[object, object, object]] = []
 
     async def record_exhausted_denial(
         self,
@@ -128,15 +138,21 @@ class FakeTavusAdminService:
         demo_request_id,
     ):
         self.exhausted_denials += 1
+        should_send_sales_email = self.should_send_sales_email_sequence.pop(0)
         return SimpleNamespace(
             denial_id=uuid4(),
             attempted_at=datetime.utcnow(),
-            should_send_sales_email=True,
+            should_send_sales_email=should_send_sales_email,
             demo_request_id=demo_request_id,
         )
 
     async def get_demo_request(self, *, demo_request_id):
         return {"name": "Jane", "email": "jane@example.com", "institution": "DPU"}
+
+    async def mark_exhausted_alert_sent(
+        self, *, denial_id, tavus_api_key_id, sent_at
+    ) -> None:
+        self.marked_exhausted_alerts.append((denial_id, tavus_api_key_id, sent_at))
 
 
 async def _fake_create_conversation(runtime_state, settings):
@@ -272,12 +288,13 @@ def test_start_tavus_conversation_returns_exhausted_message(monkeypatch):
         scenario_status=runtime_state.scenario_status,
     )
     fake_admin_service = FakeTavusAdminService()
+    fake_notifications = FakeNotificationService()
     app.dependency_overrides[get_tavus_preview_state_service] = (
         lambda: FakeTavusPreviewStateService(runtime_state)
     )
     app.dependency_overrides[get_tavus_admin_service] = lambda: fake_admin_service
     app.dependency_overrides[get_notification_service] = (
-        lambda: FakeNotificationService()
+        lambda: fake_notifications
     )
     monkeypatch.setattr(tavus_routes, "get_tavus_runtime_config", _runtime_settings)
 
@@ -288,5 +305,50 @@ def test_start_tavus_conversation_returns_exhausted_message(monkeypatch):
         app.dependency_overrides.clear()
 
     assert response.status_code == 503
-    assert "live preview limit" in response.json()["detail"]
+    assert response.json()["detail"] == tavus_routes.EXHAUSTED_PREVIEW_MESSAGE
     assert fake_admin_service.exhausted_denials == 1
+    assert fake_notifications.exhausted_alert_calls == 1
+    assert len(fake_admin_service.marked_exhausted_alerts) == 1
+
+
+def test_repeated_exhausted_attempts_do_not_resend_alert(monkeypatch):
+    runtime_state = _runtime_state()
+    runtime_state = TavusPreviewRuntimeState(
+        tavus_api_key_id=runtime_state.tavus_api_key_id,
+        api_key_secret=runtime_state.api_key_secret,
+        api_key_label=runtime_state.api_key_label,
+        tavus_api_key_status="exhausted",
+        live_seconds_remaining_estimate=0,
+        low_quota_threshold_seconds=runtime_state.low_quota_threshold_seconds,
+        low_quota_alert_sent_at=runtime_state.low_quota_alert_sent_at,
+        tavus_preview_scenario_id=runtime_state.tavus_preview_scenario_id,
+        persona_id=runtime_state.persona_id,
+        replica_id=runtime_state.replica_id,
+        scenario_status=runtime_state.scenario_status,
+    )
+    fake_admin_service = FakeTavusAdminService(
+        should_send_sales_email_sequence=[True, False]
+    )
+    fake_notifications = FakeNotificationService()
+
+    app.dependency_overrides[get_tavus_preview_state_service] = (
+        lambda: FakeTavusPreviewStateService(runtime_state)
+    )
+    app.dependency_overrides[get_tavus_admin_service] = lambda: fake_admin_service
+    app.dependency_overrides[get_notification_service] = (
+        lambda: fake_notifications
+    )
+    monkeypatch.setattr(tavus_routes, "get_tavus_runtime_config", _runtime_settings)
+
+    try:
+        client = create_client()
+        first_response = client.post("/api/tavus/conversation", json={})
+        second_response = client.post("/api/tavus/conversation", json={})
+    finally:
+        app.dependency_overrides.clear()
+
+    assert first_response.status_code == 503
+    assert second_response.status_code == 503
+    assert fake_admin_service.exhausted_denials == 2
+    assert fake_notifications.exhausted_alert_calls == 1
+    assert len(fake_admin_service.marked_exhausted_alerts) == 1

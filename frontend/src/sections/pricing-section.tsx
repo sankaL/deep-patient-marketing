@@ -143,7 +143,7 @@ const PricingSection = ({ onBookDemo }: PricingSectionProps) => {
             <span className="text-white/50">With Your Program.</span>
           </h2>
           <p className="text-gray-400 text-lg leading-relaxed">
-            DeepPatient is priced based on your institution{"\u2019"}s size and needs {"\u2014"} not on
+            DeepPatient is priced based on your institution{"\u2019"}s size and needs not on
             arbitrary tiers. Tell us about your program and we{"\u2019"}ll build a proposal around it.
           </p>
         </motion.div>

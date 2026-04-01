@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import html
 import logging
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -8,6 +7,7 @@ from datetime import datetime, timezone
 from config import NotificationSettings
 from models.public import DemoRequest, PricingInquiryRequest
 from models.tavus import TavusUsageRollup
+from services.email_templates import EmailSection, render_marketing_email
 
 try:
     import resend
@@ -30,122 +30,182 @@ class NotificationService:
         if resend and settings.resend_api_key:
             resend.api_key = settings.resend_api_key
 
-    def _send(self, *, subject: str, to: list[str], html_body: str) -> bool:
+    def _send(
+        self,
+        *,
+        subject: str,
+        to: list[str],
+        html_body: str,
+        text_body: str,
+        reply_to: list[str] | None = None,
+    ) -> bool:
         if not resend or not self._settings.resend_api_key:
-            logger.info(
-                "Skipping email delivery because Resend is not configured.",
-                extra={"subject": subject, "recipients": to},
-            )
-            return False
+            raise RuntimeError("Resend is not configured.")
 
-        resend.Emails.send(
-            {
-                "from": self._settings.from_email,
-                "to": to,
-                "subject": subject,
-                "html": html_body,
-            }
-        )
+        payload = {
+            "from": self._format_from_header(),
+            "to": to,
+            "subject": subject,
+            "html": html_body,
+            "text": text_body,
+        }
+        if reply_to:
+            payload["reply_to"] = reply_to
+
+        resend.Emails.send(payload)
         return True
 
+    def _format_from_header(self) -> str:
+        from_email = self._settings.from_email.strip()
+        if "<" in from_email and ">" in from_email:
+            return from_email
+        return f"Deep Patient <{from_email}>"
+
     async def send_newsletter_welcome(self, email: str) -> bool:
-        safe_email = html.escape(email)
+        message = render_marketing_email(
+            self._settings,
+            eyebrow="Newsletter",
+            title="Welcome to DeepPatient",
+            intro=(
+                f"Thanks for subscribing with {email}. You'll receive updates on "
+                "clinical education, AI in medicine, and DeepPatient product news."
+            ),
+            closing="The DeepPatient Team",
+        )
         return self._send(
             subject="Welcome to DeepPatient!",
             to=[email],
-            html_body=f"""
-            <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
-              <h2 style="color: #202F31;">Welcome to DeepPatient!</h2>
-              <p style="color: #5C7066; line-height: 1.6;">
-                Thanks for subscribing with {safe_email}. You'll receive updates on clinical
-                education, AI in medicine, and DeepPatient product news.
-              </p>
-              <p style="color: #5C7066;">— The DeepPatient Team</p>
-            </div>
-            """,
+            html_body=message.html,
+            text_body=message.text,
         )
 
     async def send_demo_request_notifications(self, payload: DemoRequest) -> None:
-        safe_name = html.escape(payload.name.strip())
-        safe_email = html.escape(str(payload.email))
-        safe_institution = html.escape(payload.institution.strip() or "N/A")
-        safe_team_size = html.escape(payload.team_size_text.strip() or "N/A")
-        safe_source = html.escape(payload.request_source)
+        name = payload.name.strip()
+        email = str(payload.email).strip()
+        institution = payload.institution.strip() or "N/A"
+        team_size = payload.team_size_text.strip() or "N/A"
+
+        sales_message = render_marketing_email(
+            self._settings,
+            eyebrow="Sales Lead",
+            title="New demo request",
+            intro="A visitor submitted a Book a Demo request on the marketing site.",
+            sections=[
+                EmailSection(label="Name", value=name),
+                EmailSection(label="Email", value=email),
+                EmailSection(label="Institution", value=institution),
+                EmailSection(label="Team size", value=team_size),
+                EmailSection(label="Source", value="Book demo"),
+            ],
+            closing="Send a follow-up from the sales inbox when you're ready.",
+        )
 
         self._send(
-            subject=f"New Demo Request — {safe_name}",
-            to=[self._settings.admin_email],
-            html_body=f"""
-            <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
-              <h2 style="color: #202F31;">New Demo Request</h2>
-              <p><strong>Name:</strong> {safe_name}</p>
-              <p><strong>Email:</strong> {safe_email}</p>
-              <p><strong>Institution:</strong> {safe_institution}</p>
-              <p><strong>Team Size:</strong> {safe_team_size}</p>
-              <p><strong>Source:</strong> {safe_source}</p>
-            </div>
-            """,
+            subject=f"New demo request - {name}",
+            to=[self._settings.sales_email],
+            html_body=sales_message.html,
+            text_body=sales_message.text,
+        )
+        customer_message = render_marketing_email(
+            self._settings,
+            eyebrow="Request received",
+            title=f"Thanks, {name}",
+            intro=(
+                "We've got your demo request. While our team reviews it, here is the "
+                "DeepPatient walkthrough video you can review or share with your team."
+            ),
+            cta_label="Watch the DeepPatient walkthrough",
+            cta_url=self._settings.product_video_url,
+            closing="The DeepPatient team will follow up shortly.",
         )
         self._send(
-            subject="Your DeepPatient Demo Request",
-            to=[str(payload.email)],
-            html_body=f"""
-            <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
-              <h2 style="color: #202F31;">Thanks, {safe_name}!</h2>
-              <p style="color: #5C7066; line-height: 1.6;">
-                We have received your request and will follow up soon.
-              </p>
-              <p style="color: #5C7066;">— The DeepPatient Team</p>
-            </div>
-            """,
+            subject="We received your DeepPatient demo request",
+            to=[email],
+            html_body=customer_message.html,
+            text_body=customer_message.text,
+            reply_to=[self._settings.sales_email],
         )
 
     async def send_pricing_inquiry_notification(
         self, payload: PricingInquiryRequest
     ) -> None:
-        safe_first_name = html.escape(payload.first_name.strip())
-        safe_last_name = html.escape(payload.last_name.strip())
-        safe_email = html.escape(str(payload.email))
-        safe_institution = html.escape(payload.institution.strip())
-        safe_org_size = html.escape(payload.org_size_bucket)
-        safe_source = html.escape(payload.source.strip() or "N/A")
-        safe_message = html.escape(payload.message.strip() or "N/A")
+        full_name = f"{payload.first_name.strip()} {payload.last_name.strip()}".strip()
+        email = str(payload.email).strip()
+        institution = payload.institution.strip()
+        source = payload.source.strip() or "N/A"
+        message = payload.message.strip() or "N/A"
+
+        sales_message = render_marketing_email(
+            self._settings,
+            eyebrow="Sales Lead",
+            title="New pricing request",
+            intro="A visitor requested pricing information from the marketing site.",
+            sections=[
+                EmailSection(label="Name", value=full_name),
+                EmailSection(label="Email", value=email),
+                EmailSection(label="Institution", value=institution),
+                EmailSection(label="Organization size", value=payload.org_size_bucket),
+                EmailSection(label="Source", value=source),
+                EmailSection(label="Message", value=message),
+            ],
+            closing="Review the inquiry and follow up from the sales inbox.",
+        )
 
         self._send(
-            subject=f"New Pricing Inquiry — {safe_first_name} {safe_last_name}",
-            to=[self._settings.admin_email],
-            html_body=f"""
-            <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
-              <h2 style="color: #202F31;">New Pricing Inquiry</h2>
-              <p><strong>Name:</strong> {safe_first_name} {safe_last_name}</p>
-              <p><strong>Email:</strong> {safe_email}</p>
-              <p><strong>Institution:</strong> {safe_institution}</p>
-              <p><strong>Organization Size:</strong> {safe_org_size}</p>
-              <p><strong>Source:</strong> {safe_source}</p>
-              <p><strong>Message:</strong> {safe_message}</p>
-            </div>
-            """,
+            subject=f"New pricing request - {full_name}",
+            to=[self._settings.sales_email],
+            html_body=sales_message.html,
+            text_body=sales_message.text,
+        )
+        customer_message = render_marketing_email(
+            self._settings,
+            eyebrow="Pricing request received",
+            title=f"Thanks, {payload.first_name.strip()}",
+            intro=(
+                "We've got your pricing request. While our team reviews it, here is the "
+                "DeepPatient walkthrough video you can review or share internally."
+            ),
+            cta_label="Watch the DeepPatient walkthrough",
+            cta_url=self._settings.product_video_url,
+            closing="The DeepPatient team will follow up with next steps soon.",
+        )
+        self._send(
+            subject="We received your DeepPatient pricing request",
+            to=[email],
+            html_body=customer_message.html,
+            text_body=customer_message.text,
+            reply_to=[self._settings.sales_email],
         )
 
     async def send_low_quota_alert(
         self, *, key_label: str, rollup: TavusUsageRollup
     ) -> ReminderDispatchResult:
+        message = render_marketing_email(
+            self._settings,
+            eyebrow="Tavus rotation reminder",
+            title="Live preview credits are running low",
+            intro=(
+                "The active Tavus preview key is approaching exhaustion. Rotate the key "
+                "before public visitors start hitting capacity."
+            ),
+            sections=[
+                EmailSection(label="Active key", value=key_label),
+                EmailSection(
+                    label="Estimated credits remaining",
+                    value=_format_seconds(rollup.seconds_remaining_estimate),
+                ),
+                EmailSection(
+                    label="Reminder threshold",
+                    value=_format_seconds(rollup.low_quota_threshold_seconds),
+                ),
+            ],
+            closing="Rotate the Tavus key and rebind the active scenario.",
+        )
         sent = self._send(
-            subject=f"Tavus key nearing exhaustion — {html.escape(key_label)}",
-            to=[self._settings.admin_email],
-            html_body=f"""
-            <div style="font-family: sans-serif; max-width: 560px; margin: 0 auto;">
-              <h2 style="color: #202F31;">Tavus preview capacity is low</h2>
-              <p style="color: #5C7066; line-height: 1.6;">
-                The active Tavus key <strong>{html.escape(key_label)}</strong> now has
-                approximately <strong>{rollup.seconds_remaining_estimate}</strong> seconds
-                remaining.
-              </p>
-              <p style="color: #5C7066; line-height: 1.6;">
-                Threshold: {rollup.low_quota_threshold_seconds} seconds
-              </p>
-            </div>
-            """,
+            subject=f"Tavus credits running low - {key_label}",
+            to=[self._settings.sales_email],
+            html_body=message.html,
+            text_body=message.text,
         )
         return ReminderDispatchResult(
             sent=sent,
@@ -161,29 +221,50 @@ class NotificationService:
         request_email: str | None,
         request_institution: str | None,
     ) -> ReminderDispatchResult:
-        safe_name = html.escape((request_name or "Unknown").strip() or "Unknown")
-        safe_email = html.escape((request_email or "Unknown").strip() or "Unknown")
-        safe_institution = html.escape(
-            (request_institution or "Unknown").strip() or "Unknown"
+        message = render_marketing_email(
+            self._settings,
+            eyebrow="Tavus capacity exhausted",
+            title="A visitor hit the live preview credit limit",
+            intro=(
+                "A user tried to start a live preview session but there were no Tavus "
+                "credits remaining. Rotate the active key before the next attempt."
+            ),
+            sections=[
+                EmailSection(label="Active key", value=key_label),
+                EmailSection(label="Attempted at", value=attempted_at.isoformat()),
+                EmailSection(
+                    label="Name", value=(request_name or "Unknown").strip() or "Unknown"
+                ),
+                EmailSection(
+                    label="Email", value=(request_email or "Unknown").strip() or "Unknown"
+                ),
+                EmailSection(
+                    label="Institution",
+                    value=(request_institution or "Unknown").strip() or "Unknown",
+                ),
+            ],
+            closing="Rotate the Tavus key and confirm the preview scenario is healthy.",
         )
 
         sent = self._send(
-            subject=f"Tavus preview credits exhausted — {html.escape(key_label)}",
+            subject=f"Tavus preview credits exhausted - {key_label}",
             to=[self._settings.sales_email],
-            html_body=f"""
-            <div style="font-family: sans-serif; max-width: 560px; margin: 0 auto;">
-              <h2 style="color: #202F31;">A user attempted to start the live preview with no credits left</h2>
-              <p style="color: #5C7066; line-height: 1.6;">
-                Attempted at <strong>{html.escape(attempted_at.isoformat())}</strong>.
-              </p>
-              <p><strong>Active key label:</strong> {html.escape(key_label)}</p>
-              <p><strong>Name:</strong> {safe_name}</p>
-              <p><strong>Email:</strong> {safe_email}</p>
-              <p><strong>Institution:</strong> {safe_institution}</p>
-            </div>
-            """,
+            html_body=message.html,
+            text_body=message.text,
         )
         return ReminderDispatchResult(
             sent=sent,
             sent_at=datetime.now(timezone.utc) if sent else None,
         )
+
+
+def _format_seconds(total_seconds: int) -> str:
+    minutes, seconds = divmod(max(total_seconds, 0), 60)
+    hours, minutes = divmod(minutes, 60)
+    parts: list[str] = []
+    if hours:
+        parts.append(f"{hours}h")
+    if minutes or hours:
+        parts.append(f"{minutes}m")
+    parts.append(f"{seconds}s")
+    return " ".join(parts)

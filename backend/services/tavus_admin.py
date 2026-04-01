@@ -221,6 +221,22 @@ class TavusAdminService:
             ),
         )
 
+    async def mark_exhausted_alert_sent(
+        self,
+        *,
+        denial_id: UUID,
+        tavus_api_key_id: UUID,
+        sent_at: datetime,
+    ) -> None:
+        await self._supabase.rpc(
+            "mark_tavus_exhausted_denial_alert_sent",
+            {
+                "p_denial_id": str(denial_id),
+                "p_tavus_api_key_id": str(tavus_api_key_id),
+                "p_sent_at": sent_at.isoformat(),
+            },
+        )
+
     async def get_demo_request(self, *, demo_request_id: UUID) -> dict[str, Any] | None:
         return await self._supabase.select_one(
             "demo_requests",

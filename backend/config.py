@@ -65,6 +65,8 @@ class NotificationSettings:
     from_email: str
     admin_email: str
     sales_email: str
+    product_video_url: str
+    marketing_site_url: str
 
 
 def load_environment() -> None:
@@ -186,12 +188,24 @@ def get_notification_settings() -> NotificationSettings:
 
     return NotificationSettings(
         resend_api_key=os.getenv("RESEND_API_KEY", "").strip(),
-        from_email=os.getenv("FROM_EMAIL", "hello@deeppatient.com").strip()
-        or "hello@deeppatient.com",
+        from_email=os.getenv("FROM_EMAIL", "sales@deeppatient.io").strip()
+        or "sales@deeppatient.io",
         admin_email=os.getenv("ADMIN_EMAIL", "team@deeppatient.com").strip()
         or "team@deeppatient.com",
         sales_email=os.getenv("SALES_EMAIL", "sales@deeppatient.io").strip()
         or "sales@deeppatient.io",
+        product_video_url=os.getenv(
+            "PRODUCT_VIDEO_URL",
+            (
+                "https://www.dropbox.com/scl/fi/q9tyd47c6g67drz4nourk/"
+                "DeepPatient-Demo-Vid-light-HQ.mp4"
+                "?rlkey=m27fmkw4dhethlzii5e201yb4&st=r48c1uc6&raw=1"
+            ),
+        ).strip(),
+        marketing_site_url=os.getenv(
+            "MARKETING_SITE_URL", "https://deeppatient.io"
+        ).strip()
+        or "https://deeppatient.io",
     )
 
 

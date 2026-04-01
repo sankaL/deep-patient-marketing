@@ -118,7 +118,7 @@ const IntroVideoSection = ({ demoRequestId }: IntroVideoSectionProps) => {
   }, []); // Intentionally runs once; attemptPlayback uses refs to avoid stale closures
 
   return (
-    <section className="relative overflow-hidden bg-[hsl(187,21%,10%)] pt-24 pb-20 md:pt-28 md:pb-24">
+    <section id="demo" className="relative overflow-hidden bg-[hsl(187,21%,10%)] pt-24 pb-20 md:pt-28 md:pb-24 scroll-mt-16">
       <div
         className="absolute inset-x-0 top-0 z-0 h-64 bg-gradient-to-b from-[hsl(187,24%,11%)]/10 via-[hsl(187,21%,10%)]/68 to-[hsl(187,21%,10%)] pointer-events-none"
         aria-hidden="true"

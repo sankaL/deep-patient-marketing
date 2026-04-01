@@ -45,7 +45,7 @@ function PatientInfoPanel() {
         </div>
         <div>
           <p className="text-[11px] font-semibold leading-tight text-brand-forest">
-            John Miller
+            Darius Miller
           </p>
           <p className="text-[9px] text-brand-forest/50">Male, 31</p>
         </div>
@@ -160,7 +160,7 @@ function PreviewStat({
   return (
     <div className="rounded-2xl border border-brand-forest/8 bg-white/75 px-4 py-3 shadow-[0_15px_30px_-24px_rgba(0,0,0,0.45)] backdrop-blur-sm">
       <div className="flex items-center gap-2 text-brand-forest/50">
-        <Icon className="h-4 w-4 text-brand-sage" />
+        <Icon className="h-4 w-4 text-brand-bark" />
         <span className="text-[10px] font-semibold uppercase tracking-[0.18em]">
           {label}
         </span>
@@ -228,7 +228,7 @@ export function LiveSessionPreview() {
           <div className="h-3 w-3 rounded-full bg-[#FEBC2E] shadow-inner" />
           <div className="h-3 w-3 rounded-full bg-[#28C840] shadow-inner" />
           <span className="ml-3 text-[11px] font-medium text-black/40">
-            {isActive ? "DeepPatient — Live Preview" : "DeepPatient — Live Session"}
+            {isActive ? "DeepPatient Live Preview" : "DeepPatient Live Session"}
           </span>
         </div>
 

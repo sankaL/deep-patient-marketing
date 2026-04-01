@@ -16,7 +16,7 @@ const HeroSection = ({ onBookDemo, onWatchDemo }: HeroSectionProps) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <div className="relative min-h-[820px] overflow-hidden bg-[#030303] md:min-h-[860px] lg:min-h-[900px]">
+    <div id="top" className="relative min-h-[820px] overflow-hidden bg-[#030303] md:min-h-[860px] lg:min-h-[900px]">
       {/* Gradient background */}
       <div className="absolute inset-0 bg-gradient-to-br from-[hsl(38,92%,76%)]/[0.04] via-transparent to-[hsl(26,40%,39%)]/[0.04]" />
       <div className="flex flex-col items-end absolute -right-60 -top-10 z-0 [will-change:transform] [transform:translateZ(0)]">
@@ -151,7 +151,7 @@ const HeroSection = ({ onBookDemo, onWatchDemo }: HeroSectionProps) => {
             className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white/40 font-light tracking-wide"
           >
             DeepPatient gives medical learners safe, repeatable, and interactive
-            patient encounters — with instant, rubric-based feedback on
+            patient encounters, with instant, rubric-based feedback on
             communication and diagnostic skills.
           </motion.p>
           <motion.div

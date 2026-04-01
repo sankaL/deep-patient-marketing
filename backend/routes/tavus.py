@@ -33,8 +33,7 @@ from services.tavus_state import TavusPreviewStateService
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/tavus", tags=["tavus"])
 EXHAUSTED_PREVIEW_MESSAGE = (
-    "We're over our current live preview limit right now. Please give us a little time and "
-    "try again once traffic slows down."
+    "We're overloaded right now. Check back in later."
 )
 
 
@@ -172,7 +171,7 @@ async def _handle_exhausted_preview_attempt(
                 )
 
         try:
-            await notifications.send_exhausted_capacity_alert(
+            result = await notifications.send_exhausted_capacity_alert(
                 key_label=runtime_state.api_key_label,
                 attempted_at=denial.attempted_at,
                 request_name=(
@@ -189,6 +188,12 @@ async def _handle_exhausted_preview_attempt(
                     else None
                 ),
             )
+            if result.sent and result.sent_at is not None:
+                await tavus_admin.mark_exhausted_alert_sent(
+                    denial_id=denial.denial_id,
+                    tavus_api_key_id=runtime_state.tavus_api_key_id,
+                    sent_at=result.sent_at,
+                )
         except Exception:
             logger.exception(
                 "Exhausted Tavus capacity alert failed.",

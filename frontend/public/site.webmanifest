@@ -1,0 +1,19 @@
+{
+  "name": "DeepPatient",
+  "short_name": "DeepPatient",
+  "description": "AI-powered clinical skills training for medical institutions",
+  "start_url": "https://deeppatient.io/",
+  "display": "standalone",
+  "background_color": "#202F31",
+  "theme_color": "#202F31",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "medical"],
+  "lang": "en-US"
+}
