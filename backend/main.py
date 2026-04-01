@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from config import get_allowed_origins, load_environment
+from routes.admin import router as admin_router
 from routes.public import router as public_router
 from routes.tavus import router as tavus_router
 
@@ -19,6 +20,7 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+    app.include_router(admin_router)
     app.include_router(public_router)
     app.include_router(tavus_router)
     return app

@@ -68,8 +68,22 @@ class SupabaseRestClient:
             ) from exc
 
         if response.status_code >= 400:
+            message = "The data service is unavailable right now. Please try again later."
+            try:
+                error_payload = response.json()
+            except ValueError:
+                error_payload = None
+            if isinstance(error_payload, dict):
+                error_message = (
+                    error_payload.get("message")
+                    or error_payload.get("error_description")
+                    or error_payload.get("details")
+                    or error_payload.get("hint")
+                )
+                if isinstance(error_message, str) and error_message.strip():
+                    message = error_message.strip()
             raise SupabaseRestError(
-                "The data service is unavailable right now. Please try again later.",
+                message,
                 status_code=503,
             )
 
@@ -100,6 +114,30 @@ class SupabaseRestClient:
                 "The data service returned an invalid response. Please try again later."
             )
         return payload[0] if payload else None
+
+    async def select_many(
+        self,
+        relation: str,
+        *,
+        select: str = "*",
+        filters: dict[str, str] | None = None,
+        order: str | None = None,
+        limit: int | None = None,
+    ) -> list[dict[str, Any]]:
+        params = {"select": select}
+        if filters:
+            params.update(filters)
+        if order:
+            params["order"] = order
+        if limit is not None:
+            params["limit"] = str(limit)
+
+        payload = await self._request("GET", relation, params=params)
+        if not isinstance(payload, list):
+            raise SupabaseRestError(
+                "The data service returned an invalid response. Please try again later."
+            )
+        return payload
 
     async def insert_one(self, relation: str, payload: dict[str, Any]) -> dict[str, Any]:
         response_payload = await self._request(

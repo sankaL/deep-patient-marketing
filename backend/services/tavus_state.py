@@ -19,13 +19,14 @@ class TavusPreviewStateService:
         self._supabase = supabase
 
     async def get_runtime_state(
-        self, *, preview_max_duration_seconds: int
+        self, *, preview_max_duration_seconds: int, api_key_encryption_key: str
     ) -> TavusPreviewRuntimeState | None:
         result = await self._supabase.rpc(
             "get_tavus_preview_runtime",
             {
                 "p_now": datetime.now(timezone.utc).isoformat(),
                 "p_cap_duration_seconds": preview_max_duration_seconds,
+                "p_encryption_key": api_key_encryption_key,
             },
         )
         row = result.first()

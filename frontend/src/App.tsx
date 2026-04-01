@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { AdminApp } from "@/admin/admin-app";
 import {
   ContactModal,
   type ContactFormData,
@@ -12,7 +13,7 @@ import { FooterCtaSection } from "@/sections/footer-cta-section";
 import { Footer } from "@/sections/footer";
 import { submitDemoRequest } from "@/lib/leads";
 
-function App() {
+function MarketingSite() {
   const [demoRequestId, setDemoRequestId] = useState(0);
   const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
 
@@ -52,6 +53,14 @@ function App() {
       />
     </div>
   );
+}
+
+function App() {
+  if (window.location.pathname.startsWith("/admin")) {
+    return <AdminApp />;
+  }
+
+  return <MarketingSite />;
 }
 
 export default App;

@@ -151,3 +151,39 @@ class NotificationService:
             sent=sent,
             sent_at=datetime.now(timezone.utc) if sent else None,
         )
+
+    async def send_exhausted_capacity_alert(
+        self,
+        *,
+        key_label: str,
+        attempted_at: datetime,
+        request_name: str | None,
+        request_email: str | None,
+        request_institution: str | None,
+    ) -> ReminderDispatchResult:
+        safe_name = html.escape((request_name or "Unknown").strip() or "Unknown")
+        safe_email = html.escape((request_email or "Unknown").strip() or "Unknown")
+        safe_institution = html.escape(
+            (request_institution or "Unknown").strip() or "Unknown"
+        )
+
+        sent = self._send(
+            subject=f"Tavus preview credits exhausted — {html.escape(key_label)}",
+            to=[self._settings.sales_email],
+            html_body=f"""
+            <div style="font-family: sans-serif; max-width: 560px; margin: 0 auto;">
+              <h2 style="color: #202F31;">A user attempted to start the live preview with no credits left</h2>
+              <p style="color: #5C7066; line-height: 1.6;">
+                Attempted at <strong>{html.escape(attempted_at.isoformat())}</strong>.
+              </p>
+              <p><strong>Active key label:</strong> {html.escape(key_label)}</p>
+              <p><strong>Name:</strong> {safe_name}</p>
+              <p><strong>Email:</strong> {safe_email}</p>
+              <p><strong>Institution:</strong> {safe_institution}</p>
+            </div>
+            """,
+        )
+        return ReminderDispatchResult(
+            sent=sent,
+            sent_at=datetime.now(timezone.utc) if sent else None,
+        )

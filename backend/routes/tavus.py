@@ -11,6 +11,7 @@ from fastapi import APIRouter, Body, Depends, HTTPException, Request, status
 from config import TavusConfigurationError, TavusRuntimeSettings
 from dependencies import (
     get_notification_service,
+    get_tavus_admin_service,
     get_tavus_preview_state_service,
     get_tavus_runtime_config,
 )
@@ -25,11 +26,16 @@ from models.tavus import (
 from services.notifications import NotificationService
 from services.supabase_client import SupabaseRestError
 from services.tavus import TavusServiceError, create_conversation, delete_conversation
+from services.tavus_admin import TavusAdminService
 from services.tavus_state import TavusPreviewStateService
 
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/tavus", tags=["tavus"])
+EXHAUSTED_PREVIEW_MESSAGE = (
+    "We're over our current live preview limit right now. Please give us a little time and "
+    "try again once traffic slows down."
+)
 
 
 class PreviewLaunchGate:
@@ -97,12 +103,6 @@ def _ensure_runtime_is_usable(runtime_state: TavusPreviewRuntimeState) -> None:
             detail="The live preview is currently unavailable. Please try again later.",
         )
 
-    if runtime_state.live_seconds_remaining_estimate <= 0 or runtime_state.tavus_api_key_status == "exhausted":
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="The live preview is currently at capacity. Please try again later.",
-        )
-
 
 async def _dispatch_low_quota_alerts(
     *,
@@ -145,6 +145,57 @@ async def _dispatch_low_quota_alerts(
                 )
 
 
+async def _handle_exhausted_preview_attempt(
+    *,
+    runtime_state: TavusPreviewRuntimeState,
+    payload: TavusConversationRequestBody,
+    tavus_admin: TavusAdminService,
+    notifications: NotificationService,
+) -> None:
+    denial = await tavus_admin.record_exhausted_denial(
+        tavus_api_key_id=runtime_state.tavus_api_key_id,
+        tavus_preview_scenario_id=runtime_state.tavus_preview_scenario_id,
+        demo_request_id=payload.demo_request_id,
+    )
+
+    if denial.should_send_sales_email:
+        demo_request = None
+        if denial.demo_request_id:
+            try:
+                demo_request = await tavus_admin.get_demo_request(
+                    demo_request_id=denial.demo_request_id
+                )
+            except SupabaseRestError:
+                logger.exception(
+                    "Fetching exhausted denial demo request failed.",
+                    extra={"demo_request_id": str(denial.demo_request_id)},
+                )
+
+        try:
+            await notifications.send_exhausted_capacity_alert(
+                key_label=runtime_state.api_key_label,
+                attempted_at=denial.attempted_at,
+                request_name=(
+                    str(demo_request.get("name")) if isinstance(demo_request, dict) else None
+                ),
+                request_email=(
+                    str(demo_request.get("email"))
+                    if isinstance(demo_request, dict)
+                    else None
+                ),
+                request_institution=(
+                    str(demo_request.get("institution"))
+                    if isinstance(demo_request, dict)
+                    else None
+                ),
+            )
+        except Exception:
+            logger.exception(
+                "Exhausted Tavus capacity alert failed.",
+                extra={"tavus_api_key_id": str(runtime_state.tavus_api_key_id)},
+            )
+
+
 @router.post(
     "/conversation",
     response_model=TavusConversationResponse,
@@ -156,6 +207,7 @@ async def start_tavus_conversation(
     runtime_state_service: TavusPreviewStateService = Depends(
         get_tavus_preview_state_service
     ),
+    tavus_admin: TavusAdminService = Depends(get_tavus_admin_service),
     notifications: NotificationService = Depends(get_notification_service),
 ) -> TavusConversationResponse:
     payload = payload or TavusConversationRequestBody()
@@ -185,7 +237,8 @@ async def start_tavus_conversation(
             preview_max_duration_seconds=runtime_settings.preview_max_duration_seconds
         )
         runtime_state = await runtime_state_service.get_runtime_state(
-            preview_max_duration_seconds=runtime_settings.preview_max_duration_seconds
+            preview_max_duration_seconds=runtime_settings.preview_max_duration_seconds,
+            api_key_encryption_key=runtime_settings.api_key_encryption_key,
         )
     except SupabaseRestError as exc:
         raise HTTPException(
@@ -200,6 +253,28 @@ async def start_tavus_conversation(
         )
 
     _ensure_runtime_is_usable(runtime_state)
+
+    if (
+        runtime_state.live_seconds_remaining_estimate <= 0
+        or runtime_state.tavus_api_key_status == "exhausted"
+    ):
+        try:
+            await _handle_exhausted_preview_attempt(
+                runtime_state=runtime_state,
+                payload=payload,
+                tavus_admin=tavus_admin,
+                notifications=notifications,
+            )
+        except SupabaseRestError:
+            logger.exception(
+                "Recording exhausted preview denial failed.",
+                extra={"tavus_api_key_id": str(runtime_state.tavus_api_key_id)},
+            )
+
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=EXHAUSTED_PREVIEW_MESSAGE,
+        )
 
     await _dispatch_low_quota_alerts(
         runtime_state_service=runtime_state_service,

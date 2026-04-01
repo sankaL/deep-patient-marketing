@@ -6,7 +6,11 @@ from uuid import uuid4
 
 import routes.tavus as tavus_routes
 from config import TavusRuntimeSettings
-from dependencies import get_notification_service, get_tavus_preview_state_service
+from dependencies import (
+    get_notification_service,
+    get_tavus_admin_service,
+    get_tavus_preview_state_service,
+)
 from models.tavus import (
     TavusPreviewRuntimeState,
     TavusPreviewSessionCompletionResult,
@@ -27,6 +31,7 @@ def _runtime_settings() -> TavusRuntimeSettings:
         preview_cooldown_seconds=0,
         request_timeout_seconds=20.0,
         preview_max_duration_seconds=300,
+        api_key_encryption_key="encryption-key",
     )
 
 
@@ -50,6 +55,17 @@ class FakeNotificationService:
     async def send_low_quota_alert(self, *, key_label: str, rollup: TavusUsageRollup):
         return SimpleNamespace(sent=False, sent_at=None)
 
+    async def send_exhausted_capacity_alert(
+        self,
+        *,
+        key_label: str,
+        attempted_at,
+        request_name,
+        request_email,
+        request_institution,
+    ):
+        return SimpleNamespace(sent=False, sent_at=None)
+
 
 class FakeTavusPreviewStateService:
     def __init__(self, runtime_state: TavusPreviewRuntimeState | None) -> None:
@@ -60,7 +76,9 @@ class FakeTavusPreviewStateService:
     async def close_expired_preview_sessions(self, *, preview_max_duration_seconds: int):
         return []
 
-    async def get_runtime_state(self, *, preview_max_duration_seconds: int):
+    async def get_runtime_state(
+        self, *, preview_max_duration_seconds: int, api_key_encryption_key: str
+    ):
         return self._runtime_state
 
     async def create_preview_session(
@@ -98,6 +116,29 @@ class FakeTavusPreviewStateService:
         return None
 
 
+class FakeTavusAdminService:
+    def __init__(self) -> None:
+        self.exhausted_denials = 0
+
+    async def record_exhausted_denial(
+        self,
+        *,
+        tavus_api_key_id,
+        tavus_preview_scenario_id,
+        demo_request_id,
+    ):
+        self.exhausted_denials += 1
+        return SimpleNamespace(
+            denial_id=uuid4(),
+            attempted_at=datetime.utcnow(),
+            should_send_sales_email=True,
+            demo_request_id=demo_request_id,
+        )
+
+    async def get_demo_request(self, *, demo_request_id):
+        return {"name": "Jane", "email": "jane@example.com", "institution": "DPU"}
+
+
 async def _fake_create_conversation(runtime_state, settings):
     return TavusConversationResult(
         conversation_id="conversation_123",
@@ -112,7 +153,9 @@ async def _fake_delete_conversation(runtime_state, settings, *, conversation_id:
 
 def test_start_tavus_conversation_returns_preview_session_id(monkeypatch):
     fake_state_service = FakeTavusPreviewStateService(_runtime_state())
+    fake_admin_service = FakeTavusAdminService()
     app.dependency_overrides[get_tavus_preview_state_service] = lambda: fake_state_service
+    app.dependency_overrides[get_tavus_admin_service] = lambda: fake_admin_service
     app.dependency_overrides[get_notification_service] = (
         lambda: FakeNotificationService()
     )
@@ -136,6 +179,7 @@ def test_start_tavus_conversation_returns_preview_session_id(monkeypatch):
 
 
 def test_start_tavus_conversation_fails_closed_without_active_runtime(monkeypatch):
+    app.dependency_overrides[get_tavus_admin_service] = lambda: FakeTavusAdminService()
     app.dependency_overrides[get_tavus_preview_state_service] = (
         lambda: FakeTavusPreviewStateService(None)
     )
@@ -157,6 +201,7 @@ def test_start_tavus_conversation_fails_closed_without_active_runtime(monkeypatc
 
 
 def test_complete_preview_session_returns_duration(monkeypatch):
+    app.dependency_overrides[get_tavus_admin_service] = lambda: FakeTavusAdminService()
     app.dependency_overrides[get_tavus_preview_state_service] = (
         lambda: FakeTavusPreviewStateService(_runtime_state())
     )
@@ -193,6 +238,7 @@ def test_start_tavus_conversation_cleans_up_tavus_conversation_on_db_failure(
         cleanup_calls.append(conversation_id)
 
     app.dependency_overrides[get_tavus_preview_state_service] = lambda: fake_state_service
+    app.dependency_overrides[get_tavus_admin_service] = lambda: FakeTavusAdminService()
     app.dependency_overrides[get_notification_service] = (
         lambda: FakeNotificationService()
     )
@@ -208,3 +254,39 @@ def test_start_tavus_conversation_cleans_up_tavus_conversation_on_db_failure(
 
     assert response.status_code == 503
     assert cleanup_calls == ["conversation_123"]
+
+
+def test_start_tavus_conversation_returns_exhausted_message(monkeypatch):
+    runtime_state = _runtime_state()
+    runtime_state = TavusPreviewRuntimeState(
+        tavus_api_key_id=runtime_state.tavus_api_key_id,
+        api_key_secret=runtime_state.api_key_secret,
+        api_key_label=runtime_state.api_key_label,
+        tavus_api_key_status="exhausted",
+        live_seconds_remaining_estimate=0,
+        low_quota_threshold_seconds=runtime_state.low_quota_threshold_seconds,
+        low_quota_alert_sent_at=runtime_state.low_quota_alert_sent_at,
+        tavus_preview_scenario_id=runtime_state.tavus_preview_scenario_id,
+        persona_id=runtime_state.persona_id,
+        replica_id=runtime_state.replica_id,
+        scenario_status=runtime_state.scenario_status,
+    )
+    fake_admin_service = FakeTavusAdminService()
+    app.dependency_overrides[get_tavus_preview_state_service] = (
+        lambda: FakeTavusPreviewStateService(runtime_state)
+    )
+    app.dependency_overrides[get_tavus_admin_service] = lambda: fake_admin_service
+    app.dependency_overrides[get_notification_service] = (
+        lambda: FakeNotificationService()
+    )
+    monkeypatch.setattr(tavus_routes, "get_tavus_runtime_config", _runtime_settings)
+
+    try:
+        client = create_client()
+        response = client.post("/api/tavus/conversation", json={})
+    finally:
+        app.dependency_overrides.clear()
+
+    assert response.status_code == 503
+    assert "live preview limit" in response.json()["detail"]
+    assert fake_admin_service.exhausted_denials == 1

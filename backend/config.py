@@ -29,8 +29,22 @@ class TavusConfigurationError(AppConfigurationError):
 class SupabaseSettings:
     mode: Literal["local", "remote"]
     url: str
+    anon_key: str
     service_role_key: str
     request_timeout_seconds: float
+
+
+@dataclass(frozen=True)
+class AdminAuthSettings:
+    auth_url: str
+    anon_key: str
+    allowed_admin_emails: tuple[str, ...]
+    access_cookie_name: str
+    refresh_cookie_name: str
+    cookie_secure: bool
+    cookie_domain: str | None
+    cookie_same_site: Literal["lax", "strict", "none"]
+    refresh_slack_seconds: int
 
 
 @dataclass(frozen=True)
@@ -42,6 +56,7 @@ class TavusRuntimeSettings:
     preview_cooldown_seconds: int
     request_timeout_seconds: float
     preview_max_duration_seconds: int
+    api_key_encryption_key: str
 
 
 @dataclass(frozen=True)
@@ -49,6 +64,7 @@ class NotificationSettings:
     resend_api_key: str
     from_email: str
     admin_email: str
+    sales_email: str
 
 
 def load_environment() -> None:
@@ -115,6 +131,7 @@ def get_supabase_settings() -> SupabaseSettings:
         raise SupabaseConfigurationError("Supabase is not configured correctly.")
 
     url = os.getenv("SUPABASE_URL", "").strip()
+    anon_key = os.getenv("SUPABASE_ANON_KEY", "").strip()
     service_role_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "").strip()
 
     if not url or not service_role_key:
@@ -123,6 +140,7 @@ def get_supabase_settings() -> SupabaseSettings:
     return SupabaseSettings(
         mode=raw_mode,
         url=url,
+        anon_key=anon_key or service_role_key,
         service_role_key=service_role_key,
         request_timeout_seconds=_read_float(
             "SUPABASE_REQUEST_TIMEOUT_SECONDS", 10.0, minimum=1.0
@@ -154,7 +172,13 @@ def get_tavus_runtime_settings() -> TavusRuntimeSettings:
         preview_max_duration_seconds=_read_int(
             "TAVUS_PREVIEW_MAX_DURATION_SECONDS", 300, minimum=30
         ),
+        api_key_encryption_key=os.getenv("TAVUS_API_KEY_ENCRYPTION_KEY", "").strip()
+        or (_raise_tavus_encryption_error()),
     )
+
+
+def _raise_tavus_encryption_error() -> str:
+    raise TavusConfigurationError("The Tavus API key encryption secret is not configured.")
 
 
 def get_notification_settings() -> NotificationSettings:
@@ -166,6 +190,64 @@ def get_notification_settings() -> NotificationSettings:
         or "hello@deeppatient.com",
         admin_email=os.getenv("ADMIN_EMAIL", "team@deeppatient.com").strip()
         or "team@deeppatient.com",
+        sales_email=os.getenv("SALES_EMAIL", "sales@deeppatient.io").strip()
+        or "sales@deeppatient.io",
+    )
+
+
+def get_admin_auth_settings() -> AdminAuthSettings:
+    load_environment()
+
+    auth_url = (
+        os.getenv("SUPABASE_AUTH_URL", "").strip()
+        or os.getenv("SUPABASE_URL", "").strip()
+    )
+    anon_key = os.getenv("SUPABASE_ANON_KEY", "").strip()
+    if not auth_url or not anon_key:
+        raise SupabaseConfigurationError("Supabase auth is not configured yet.")
+
+    if not auth_url.rstrip("/").endswith("/auth/v1"):
+        auth_url = f"{auth_url.rstrip('/')}/auth/v1"
+
+    raw_allowed_emails = os.getenv("ADMIN_EMAILS", "").strip()
+    if raw_allowed_emails:
+        allowed_admin_emails = tuple(
+            email.strip().lower()
+            for email in raw_allowed_emails.split(",")
+            if email.strip()
+        )
+    else:
+        fallback = os.getenv("ADMIN_EMAIL", "").strip().lower()
+        allowed_admin_emails = (fallback,) if fallback else ()
+
+    if not allowed_admin_emails:
+        raise SupabaseConfigurationError("Admin auth is not configured yet.")
+
+    same_site = os.getenv("ADMIN_AUTH_COOKIE_SAME_SITE", "lax").strip().lower()
+    if same_site not in {"lax", "strict", "none"}:
+        raise SupabaseConfigurationError("Admin auth is not configured correctly.")
+
+    raw_cookie_domain = os.getenv("ADMIN_AUTH_COOKIE_DOMAIN")
+    cookie_domain = raw_cookie_domain.strip() if raw_cookie_domain else None
+
+    return AdminAuthSettings(
+        auth_url=auth_url,
+        anon_key=anon_key,
+        allowed_admin_emails=allowed_admin_emails,
+        access_cookie_name=os.getenv(
+            "ADMIN_AUTH_ACCESS_COOKIE_NAME", "dp_admin_access_token"
+        ).strip()
+        or "dp_admin_access_token",
+        refresh_cookie_name=os.getenv(
+            "ADMIN_AUTH_REFRESH_COOKIE_NAME", "dp_admin_refresh_token"
+        ).strip()
+        or "dp_admin_refresh_token",
+        cookie_secure=_read_bool("ADMIN_AUTH_COOKIE_SECURE", False),
+        cookie_domain=cookie_domain or None,
+        cookie_same_site=same_site,
+        refresh_slack_seconds=_read_int(
+            "ADMIN_AUTH_REFRESH_SLACK_SECONDS", 60, minimum=0
+        ),
     )
 
 

@@ -41,10 +41,16 @@ done
 bootstrap_api_key=${TAVUS_BOOTSTRAP_API_KEY:-${TAVUS_API_KEY:-}}
 bootstrap_persona_id=${TAVUS_BOOTSTRAP_PERSONA_ID:-${TAVUS_PERSONA_ID:-}}
 bootstrap_replica_id=${TAVUS_BOOTSTRAP_REPLICA_ID:-${TAVUS_REPLICA_ID:-}}
+bootstrap_encryption_key=${TAVUS_API_KEY_ENCRYPTION_KEY:-}
 
 if [ -z "${bootstrap_api_key:-}" ] || [ -z "${bootstrap_persona_id:-}" ] || [ -z "${bootstrap_replica_id:-}" ]; then
   echo "Skipping Tavus bootstrap seed because bootstrap env values are incomplete."
   exit 0
+fi
+
+if [ -z "${bootstrap_encryption_key:-}" ]; then
+  echo "Error: TAVUS_API_KEY_ENCRYPTION_KEY must be set when bootstrapping a Tavus API key." >&2
+  exit 1
 fi
 
 bootstrap_label=${TAVUS_BOOTSTRAP_KEY_LABEL:-Local preview key}
@@ -57,6 +63,7 @@ require_non_negative_integer "$low_quota_threshold_minutes" "TAVUS_BOOTSTRAP_LOW
 psql \
   -v ON_ERROR_STOP=1 \
   -v bootstrap_api_key="$bootstrap_api_key" \
+  -v bootstrap_encryption_key="$bootstrap_encryption_key" \
   -v bootstrap_persona_id="$bootstrap_persona_id" \
   -v bootstrap_replica_id="$bootstrap_replica_id" \
   -v bootstrap_key_label="$bootstrap_label" \
@@ -81,7 +88,13 @@ inserted_key AS (
         low_quota_threshold_seconds,
         activated_at
     )
-    SELECT :'bootstrap_api_key',
+    SELECT 'enc:' || armor(
+               pgp_sym_encrypt(
+                   :'bootstrap_api_key',
+                   :'bootstrap_encryption_key',
+                   'cipher-algo=aes256'
+               )
+           ),
            :'bootstrap_key_label',
            'active',
            :'bootstrap_total_seconds'::integer,

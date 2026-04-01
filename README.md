@@ -15,6 +15,7 @@ cp backend/.env.example backend/.env
 ```
 
 For local development, the committed example points the backend at the local PostgREST gateway on `http://localhost:54321` and seeds one active Tavus key/scenario from the bootstrap variables.
+The backend now also expects Supabase Auth settings for the hidden admin portal. Configure `SUPABASE_AUTH_URL`, `SUPABASE_ANON_KEY`, and `ADMIN_EMAILS` in `backend/.env` before using `/admin`.
 
 ## Start The Stack
 
@@ -30,6 +31,7 @@ This starts:
 - the local Postgres database on `localhost:55432` when `SUPABASE_MODE=local`
 
 The frontend proxies `/api` requests to the backend container, so browser requests stay same-origin during development.
+The hidden admin portal is available by direct URL at `http://localhost:5173/admin`.
 
 When `SUPABASE_MODE=remote`, `make dev` starts only the frontend and backend containers and expects `SUPABASE_URL` plus `SUPABASE_SERVICE_ROLE_KEY` to target a hosted Supabase project.
 
@@ -49,3 +51,4 @@ make down
 - Backend source changes reload through Uvicorn.
 - Local schema migrations and Tavus bootstrap seeding run through the `supabase-bootstrap` one-shot container before the backend starts.
 - Resend can remain unset for local work; public form submission still persists, and notification delivery is skipped.
+- Sales notifications for exhausted Tavus capacity are controlled through `SALES_EMAIL`.
