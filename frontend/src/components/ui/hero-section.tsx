@@ -1,214 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import {
-  ArrowRight,
-  Menu,
-  X,
-  Mic,
-  Video,
-  MonitorUp,
-  PhoneOff,
-  Heart,
-  Thermometer,
-  Wind,
-  Activity,
-  Clock,
-  FileText,
-  User,
-  Stethoscope,
-} from "lucide-react";
+import { useState } from "react";
+import { ArrowRight, Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import patientImage from "@/assets/patient-interaction-call.png";
 import logoWhite from "@/assets/brand/deeppatient-logo-white.svg";
+import { LiveSessionPreview } from "@/components/live-session/live-session-preview";
 import { HeroShapes } from "@/components/ui/shape-landing-hero";
-
-/* ── Elapsed Timer ── */
-function ElapsedTimer() {
-  const [seconds, setSeconds] = useState(247); // start at 4:07
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setSeconds((s) => s + 1);
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const min = Math.floor(seconds / 60)
-    .toString()
-    .padStart(2, "0");
-  const sec = (seconds % 60).toString().padStart(2, "0");
-
-  return (
-    <div className="flex items-center gap-1.5 text-xs font-mono text-brand-forest/70">
-      <Clock className="h-3.5 w-3.5" />
-      <span>{min}:{sec}</span>
-    </div>
-  );
-}
-
-/* ── Vitals Sparkline (SVG) ── */
-function HeartRateSparkline() {
-  return (
-    <svg viewBox="0 0 120 32" className="w-full h-8" fill="none">
-      <polyline
-        points="0,20 8,20 12,20 16,18 20,22 24,16 26,24 28,8 30,28 32,14 36,20 44,20 48,20 52,18 56,22 60,16 62,24 64,8 66,28 68,14 72,20 80,20 84,20 88,18 92,22 96,16 98,24 100,8 102,28 104,14 108,20 116,20 120,20"
-        stroke="hsl(120, 41%, 30%)"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-/* ── Patient Info Panel (React component, light theme) ── */
-function PatientInfoPanel() {
-  return (
-    <div className="flex flex-col gap-3 h-full py-1">
-      {/* Patient Header */}
-      <div className="flex items-center gap-2 px-1">
-        <div className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-forest/10">
-          <User className="h-3.5 w-3.5 text-brand-forest" />
-        </div>
-        <div>
-          <p className="text-[11px] font-semibold text-brand-forest leading-tight">
-            Carlos Mendez
-          </p>
-          <p className="text-[9px] text-brand-forest/50">Male, 34</p>
-        </div>
-      </div>
-
-      {/* Vitals Section */}
-      <div className="rounded-xl bg-white border border-brand-forest/8 p-3 space-y-2.5">
-        <div className="flex items-center gap-1.5">
-          <Activity className="h-3 w-3 text-success" />
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-brand-forest/50">
-            Vitals
-          </span>
-        </div>
-
-        {/* Heart Rate */}
-        <div>
-          <div className="flex items-center justify-between mb-1">
-            <div className="flex items-center gap-1">
-              <Heart className="h-3 w-3 text-red-500" />
-              <span className="text-[10px] text-brand-forest/60">HR</span>
-            </div>
-            <span className="text-xs font-semibold text-brand-forest">
-              78 <span className="text-[9px] font-normal text-brand-forest/50">bpm</span>
-            </span>
-          </div>
-          <HeartRateSparkline />
-        </div>
-
-        {/* Grid vitals */}
-        <div className="grid grid-cols-2 gap-2">
-          <div className="rounded-lg bg-brand-cream-dark/60 px-2 py-1.5">
-            <div className="flex items-center gap-1 mb-0.5">
-              <Activity className="h-2.5 w-2.5 text-brand-forest/40" />
-              <span className="text-[9px] text-brand-forest/50">BP</span>
-            </div>
-            <span className="text-[11px] font-semibold text-brand-forest">120/80</span>
-          </div>
-          <div className="rounded-lg bg-brand-cream-dark/60 px-2 py-1.5">
-            <div className="flex items-center gap-1 mb-0.5">
-              <Wind className="h-2.5 w-2.5 text-brand-forest/40" />
-              <span className="text-[9px] text-brand-forest/50">SpO₂</span>
-            </div>
-            <span className="text-[11px] font-semibold text-brand-forest">
-              98<span className="text-[9px] font-normal">%</span>
-            </span>
-          </div>
-          <div className="rounded-lg bg-brand-cream-dark/60 px-2 py-1.5">
-            <div className="flex items-center gap-1 mb-0.5">
-              <Thermometer className="h-2.5 w-2.5 text-brand-forest/40" />
-              <span className="text-[9px] text-brand-forest/50">Temp</span>
-            </div>
-            <span className="text-[11px] font-semibold text-brand-forest">
-              98.6<span className="text-[9px] font-normal">°F</span>
-            </span>
-          </div>
-          <div className="rounded-lg bg-brand-cream-dark/60 px-2 py-1.5">
-            <div className="flex items-center gap-1 mb-0.5">
-              <Wind className="h-2.5 w-2.5 text-brand-forest/40" />
-              <span className="text-[9px] text-brand-forest/50">RR</span>
-            </div>
-            <span className="text-[11px] font-semibold text-brand-forest">
-              16<span className="text-[9px] font-normal">/min</span>
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Scenario Card */}
-      <div className="rounded-xl bg-white border border-brand-forest/8 p-3 space-y-2">
-        <div className="flex items-center gap-1.5">
-          <FileText className="h-3 w-3 text-brand-sage" />
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-brand-forest/50">
-            Scenario
-          </span>
-        </div>
-        <div className="space-y-1.5">
-          <div>
-            <p className="text-[9px] font-medium text-brand-forest/40 uppercase tracking-wider">
-              Chief Complaint
-            </p>
-            <p className="text-[11px] font-medium text-brand-forest leading-snug">
-              Persistent headache for 3 days
-            </p>
-          </div>
-          <div className="h-px bg-brand-forest/6" />
-          <div>
-            <p className="text-[9px] font-medium text-brand-forest/40 uppercase tracking-wider">
-              History
-            </p>
-            <p className="text-[10px] text-brand-forest/70 leading-snug">
-              No prior hx of migraines. Reports mild nausea with light sensitivity.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Scoring tag */}
-      <div className="flex items-center gap-1.5 px-1 mt-auto">
-        <Stethoscope className="h-3 w-3 text-brand-sage" />
-        <span className="text-[9px] font-medium text-brand-forest/40">
-          OSCE Rubric — Active
-        </span>
-      </div>
-    </div>
-  );
-}
-
-/* ── Video Call Controls ── */
-function VideoCallControls() {
-  return (
-    <div className="flex items-center justify-between px-4 py-2.5">
-      <ElapsedTimer />
-
-      <div className="flex items-center gap-2">
-        <button className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-forest/8 hover:bg-brand-forest/15 transition-colors text-brand-forest/70">
-          <Mic className="h-4 w-4" />
-        </button>
-        <button className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-forest/8 hover:bg-brand-forest/15 transition-colors text-brand-forest/70">
-          <Video className="h-4 w-4" />
-        </button>
-        <button className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-forest/8 hover:bg-brand-forest/15 transition-colors text-brand-forest/70">
-          <MonitorUp className="h-4 w-4" />
-        </button>
-        <button className="flex h-9 w-9 items-center justify-center rounded-full bg-red-500/10 hover:bg-red-500/20 transition-colors text-red-500">
-          <PhoneOff className="h-4 w-4" />
-        </button>
-      </div>
-
-      <div className="flex items-center gap-1.5">
-        <div className="h-2 w-2 rounded-full bg-success animate-pulse" />
-        <span className="text-[10px] font-medium text-brand-forest/50">Live</span>
-      </div>
-    </div>
-  );
-}
 
 /* ══════════════════════════════════════════════
    ║            HERO SECTION                   ║
@@ -230,8 +27,15 @@ const HeroSection = () => {
       {/* ── Elegant floating shapes ── */}
       <HeroShapes />
 
-      {/* Fade overlay at top/bottom */}
-      <div className="absolute inset-0 bg-gradient-to-t from-[#030303] via-transparent to-[#030303]/80 pointer-events-none z-[1]" />
+      {/* Fade overlay at top/bottom — bottom blends into the features section teal over a tall area */}
+      <div className="absolute inset-0 bg-gradient-to-t from-[hsl(187,21%,10%)] via-[hsl(187,21%,10%)]/20 to-[#030303]/80 pointer-events-none z-[1]" style={{backgroundSize:'100% 100%'}} />
+
+      {/* Blue-teal smudge for section transition — behind all content */}
+      <div className="absolute bottom-0 left-0 right-0 h-[55%] pointer-events-none z-[2]" aria-hidden="true">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[hsl(187,30%,10%)]/40 to-[hsl(187,21%,10%)]" />
+        <div className="absolute left-1/2 -translate-x-1/2 bottom-0 w-[80rem] h-72 bg-[hsl(187,60%,25%)]/12 blur-[10rem] rounded-full" />
+        <div className="absolute left-1/2 -translate-x-1/2 bottom-8 w-[40rem] h-40 bg-[hsl(187,70%,40%)]/6 blur-[8rem] rounded-full" />
+      </div>
 
       {/* Content container */}
       <div className="relative z-10">
@@ -358,55 +162,7 @@ const HeroSection = () => {
               Watch Demo
             </button>
           </motion.div>
-
-          {/* ══════════════════════════════════════
-               MAC WINDOW — INTERACTIVE VIDEO CALL
-             ══════════════════════════════════════ */}
-          <motion.div
-            initial={{ opacity: 0, y: 60 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1.2, delay: 0.9, ease: [0.25, 0.4, 0.25, 1] }}
-            className="relative mx-auto mt-14 mb-16 w-full max-w-5xl"
-          >
-            {/* Glow behind */}
-            <div className="absolute inset-0 rounded-2xl bg-brand-sage/15 blur-[6rem]" />
-            <div className="absolute -inset-4 rounded-2xl bg-gradient-to-b from-brand-sage/8 to-transparent blur-3xl" />
-
-            {/* Mac window frame — LIGHT THEME */}
-            <div className="relative rounded-2xl border border-black/10 bg-brand-cream shadow-[0_25px_60px_-15px_rgba(0,0,0,0.4)] overflow-hidden">
-              {/* Window chrome */}
-              <div className="flex items-center gap-2 px-4 py-2.5 bg-[#f6f6f6] border-b border-black/5">
-                <div className="w-3 h-3 rounded-full bg-[#FF5F57] shadow-inner" />
-                <div className="w-3 h-3 rounded-full bg-[#FEBC2E] shadow-inner" />
-                <div className="w-3 h-3 rounded-full bg-[#28C840] shadow-inner" />
-                <span className="ml-3 text-[11px] text-black/40 font-medium">
-                  DeepPatient — Live Session
-                </span>
-              </div>
-
-              {/* Content area */}
-              <div className="flex flex-col md:flex-row h-[360px]">
-                {/* Left — Video feed */}
-                <div className="flex-1 relative overflow-hidden bg-[#1a1a1a]">
-                  <img
-                    src={patientImage}
-                    alt="AI patient video encounter — Carlos Mendez presenting with persistent headache"
-                    className="w-full h-full object-cover object-top"
-                  />
-                </div>
-
-                {/* Right — Patient info panel */}
-                <div className="hidden md:flex md:flex-col w-[220px] bg-brand-cream-dark/50 border-l border-black/5 p-3 text-left overflow-y-auto">
-                  <PatientInfoPanel />
-                </div>
-              </div>
-
-              {/* Bottom — Controls bar */}
-              <div className="bg-[#f9f9f8] border-t border-black/5">
-                <VideoCallControls />
-              </div>
-            </div>
-          </motion.div>
+          <LiveSessionPreview />
         </div>
       </div>
     </div>

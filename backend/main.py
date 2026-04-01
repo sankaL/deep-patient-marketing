@@ -1,6 +1,6 @@
 """
 DeepPatient Marketing — Backend API
-FastAPI + Resend for email handling
+FastAPI + Resend + Tavus preview handling
 """
 
 import os
@@ -8,25 +8,40 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, EmailStr
 
+from config import load_environment
+from routes.tavus import router as tavus_router
+
 try:
     import resend
 except ImportError:
     resend = None  # type: ignore
 
+load_environment()
+
 app = FastAPI(title="DeepPatient Marketing API", version="1.0.0")
+
+
+def get_allowed_origins() -> list[str]:
+    configured_origins = os.getenv("BACKEND_CORS_ORIGINS", "").strip()
+    if configured_origins:
+        return [origin.strip() for origin in configured_origins.split(",") if origin.strip()]
+
+    return [
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "http://127.0.0.1:5173",
+    ]
 
 # ── CORS ──
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://localhost:3000",
-        "http://127.0.0.1:5173",
-    ],
+    allow_origins=get_allowed_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(tavus_router)
 
 # ── Resend config ──
 RESEND_API_KEY = os.getenv("RESEND_API_KEY", "")

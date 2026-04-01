@@ -32,6 +32,9 @@ const pillars = [
 const FeaturesSection = () => {
   return (
     <section className="relative py-24 md:py-32 bg-[hsl(187,21%,10%)]">
+      {/* Top smudge — overlaps hero and fades from transparent so the section bleeds in gradually */}
+      <div className="absolute top-0 left-0 right-0 h-48 bg-gradient-to-b from-transparent to-[hsl(187,21%,10%)] pointer-events-none z-0" aria-hidden="true" />
+
       {/* Subtle glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[40rem] h-[20rem] bg-brand-sage/8 rounded-full blur-[8rem]" />
 

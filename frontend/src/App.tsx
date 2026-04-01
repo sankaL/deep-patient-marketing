@@ -10,6 +10,8 @@ function App() {
   return (
     <div className="min-h-screen bg-black">
       <HeroSection />
+      {/* Bridge gradient sits outside overflow-hidden — covers the section seam completely */}
+      <div className="relative -mt-48 h-48 pointer-events-none z-10 bg-gradient-to-b from-transparent to-[hsl(187,21%,10%)]" aria-hidden="true" />
       <FeaturesSection />
       <PersonasSection />
       <TestimonialSection />
