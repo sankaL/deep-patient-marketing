@@ -19,7 +19,7 @@ const features = [
       "Learners engage in a real-time, live video call with a lifelike AI-simulated patient. Adaptive AI responses ensure each simulation feels dynamic and realistic, not scripted.",
     gradient: "from-brand-sage/20 to-transparent",
     iconBg: "bg-brand-sage/10 border-brand-sage/20",
-    iconColor: "text-brand-sage",
+    iconColor: "text-[#8B5E3C]",
   },
   {
     number: "02",
@@ -30,7 +30,7 @@ const features = [
       "After each session, our evaluator AI agent assesses performance against a custom-defined rubric \u2014 producing an objective score and written narrative. Reports are exportable as PDF.",
     gradient: "from-feedback-cta/20 to-transparent",
     iconBg: "bg-feedback-cta/10 border-feedback-cta/20",
-    iconColor: "text-feedback-cta",
+    iconColor: "text-[#8B5E3C]",
   },
   {
     number: "03",
@@ -41,7 +41,7 @@ const features = [
       "Create scenarios from scratch, define patient backstories, set behavioral parameters, and attach custom evaluation rubrics \u2014 all without writing a line of code.",
     gradient: "from-brand-bark/20 to-transparent",
     iconBg: "bg-brand-bark/10 border-brand-bark/20",
-    iconColor: "text-brand-bark",
+    iconColor: "text-[#8B5E3C]",
   },
   {
     number: "04",
@@ -113,7 +113,7 @@ const FeaturesSection = () => {
             <span className="text-white/50">Nothing It Doesn{"\u2019"}t.</span>
           </h2>
           <p className="text-gray-400 text-lg leading-relaxed">
-            DeepPatient is an end-to-end platform for clinical skills training {"\u2014"} built to be
+            DeepPatient is an end-to-end platform for clinical skills training built to be
             lifelike for learners, powerful for faculty, and manageable for admins.
           </p>
         </motion.div>

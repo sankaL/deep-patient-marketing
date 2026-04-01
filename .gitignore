@@ -87,3 +87,5 @@ deep-patient-app/*
 *.mov
 *.mp4
 *.webm
+
+.deployment-keys

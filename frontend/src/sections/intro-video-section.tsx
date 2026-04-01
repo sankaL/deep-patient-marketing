@@ -1,54 +1,150 @@
-import { Play, Volume2 } from "lucide-react";
+import { AlertCircle, Play, Volume2 } from "lucide-react";
 import { motion } from "motion/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type IntroVideoSectionProps = {
   demoRequestId: number;
 };
 
+// Dropbox public demo video — no auth required, served via marketing CDN
+const DROPBOX_DEMO_URL =
+  "https://www.dropbox.com/scl/fi/q9tyd47c6g67drz4nourk/DeepPatient-Demo-Vid-light-HQ.mp4?rlkey=m27fmkw4dhethlzii5e201yb4&st=r48c1uc6&dl=0";
+
+function toDropboxStreamUrl(url: string) {
+  const parsedUrl = new URL(url);
+  parsedUrl.searchParams.delete("dl");
+  parsedUrl.searchParams.set("raw", "1");
+  return parsedUrl.toString();
+}
+
 const IntroVideoSection = ({ demoRequestId }: IntroVideoSectionProps) => {
   const demoRef = useRef<HTMLDivElement | null>(null);
-  const [hasManualPlaybackStarted, setHasManualPlaybackStarted] = useState(false);
-  const isDemoPlaying = hasManualPlaybackStarted || demoRequestId > 0;
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [playbackLabel, setPlaybackLabel] = useState("Ready");
+  const [playbackHint, setPlaybackHint] = useState(
+    "Click play to watch the DeepPatient walkthrough.",
+  );
+  const videoSrc = useMemo(() => toDropboxStreamUrl(DROPBOX_DEMO_URL), []);
+
+  const attemptPlayback = async ({
+    preferAudio,
+    loadingHint,
+  }: {
+    preferAudio: boolean;
+    loadingHint: string;
+  }) => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    setPlaybackLabel("Loading");
+    setPlaybackHint(loadingHint);
+
+    try {
+      video.muted = !preferAudio;
+      await video.play();
+      setPlaybackLabel(preferAudio ? "Playing" : "Playing muted");
+      setPlaybackHint(
+        preferAudio
+          ? "Demo started with audio."
+          : "Autoplay started muted. Use the player to enable audio.",
+      );
+    } catch {
+      if (preferAudio) {
+        try {
+          video.muted = true;
+          await video.play();
+          setPlaybackLabel("Playing muted");
+          setPlaybackHint("Autoplay started muted. Use the player to enable audio.");
+          return;
+        } catch {
+          // Fall through to the generic blocked state below.
+        }
+      }
+
+      setPlaybackLabel("Ready");
+      setPlaybackHint("Autoplay was blocked. Press play in the player.");
+    }
+  };
 
   useEffect(() => {
     if (!demoRequestId) return;
+
     demoRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+
+    const video = videoRef.current;
+    if (!video) return;
+
+    video.currentTime = 0;
+    void attemptPlayback({
+      preferAudio: true,
+      loadingHint: "Opening the product demo from the top.",
+    });
   }, [demoRequestId]);
 
+  useEffect(() => {
+    const container = demoRef.current;
+    const video = videoRef.current;
+    if (!container || !video) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          if (video.paused || video.ended) {
+            void attemptPlayback({
+              preferAudio: false,
+              loadingHint: "Starting the demo as the section enters view.",
+            });
+          }
+          return;
+        }
+
+        if (!video.paused && !video.ended) {
+          video.pause();
+          setPlaybackLabel("Paused");
+          setPlaybackHint("Playback paused while the demo is out of view.");
+        }
+      },
+      {
+        threshold: 0.65,
+      },
+    );
+
+    observer.observe(container);
+
+    return () => {
+      observer.disconnect();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Intentionally runs once; attemptPlayback uses refs to avoid stale closures
+
   return (
-    <section className="relative py-24 md:py-32 bg-[hsl(187,21%,10%)]">
-      {/* Top blend */}
+    <section id="demo" className="relative overflow-hidden bg-[hsl(187,21%,10%)] pt-24 pb-20 md:pt-28 md:pb-24 scroll-mt-16">
       <div
-        className="absolute top-0 left-0 right-0 h-48 bg-gradient-to-b from-transparent to-[hsl(187,21%,10%)] pointer-events-none z-0"
+        className="absolute inset-x-0 top-0 z-0 h-64 bg-gradient-to-b from-[hsl(187,24%,11%)]/10 via-[hsl(187,21%,10%)]/68 to-[hsl(187,21%,10%)] pointer-events-none"
         aria-hidden="true"
       />
-      {/* Subtle glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[40rem] h-[20rem] bg-brand-sage/8 rounded-full blur-[8rem]" />
+      <div className="absolute top-0 left-1/2 h-[26rem] w-[52rem] -translate-x-1/2 rounded-full bg-brand-sage/8 blur-[10rem]" />
 
       <div className="relative container mx-auto px-4">
-        {/* Section header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center max-w-3xl mx-auto mb-16"
+          className="mx-auto mb-16 max-w-3xl text-center"
         >
-          <span className="text-brand-sage text-sm font-semibold uppercase tracking-[0.2em] mb-4 block">
-            Platform
+          <span className="mb-4 block text-sm font-semibold uppercase tracking-[0.2em] text-brand-sage">
+            Meet the Product
           </span>
-          <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
+          <h2 className="mb-6 text-3xl font-bold text-white md:text-5xl">
             What is DeepPatient?
           </h2>
-          <p className="text-gray-400 text-lg leading-relaxed">
-            A complete clinical skills training platform built for every role at
-            your institution \u2014 from secure scenario creation to cohort-level
-            analytics.
+          <p className="text-lg leading-relaxed text-gray-400">
+            A short walkthrough of the DeepPatient experience, what the patient
+            interaction includes, and the core features learners can expect.
           </p>
         </motion.div>
 
-        {/* Video player */}
         <motion.div
           ref={demoRef}
           initial={{ opacity: 0, y: 30 }}
@@ -58,77 +154,63 @@ const IntroVideoSection = ({ demoRequestId }: IntroVideoSectionProps) => {
           className="scroll-mt-24"
         >
           <div className="rounded-[2rem] border border-white/10 bg-[linear-gradient(145deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))] p-3 shadow-[0_30px_120px_rgba(0,0,0,0.35)] backdrop-blur-xl md:p-4">
-            <div className="relative aspect-[16/9] overflow-hidden rounded-[1.5rem] border border-white/10 bg-[#07181a]">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(242,176,39,0.2),transparent_42%),linear-gradient(135deg,rgba(7,24,26,0.82),rgba(10,34,37,0.96))]" />
-
-              {/* Top bar */}
-              <div className="absolute inset-x-0 top-0 flex items-center justify-between border-b border-white/10 bg-black/20 px-4 py-3 backdrop-blur md:px-6">
+            <div className="overflow-hidden rounded-[1.5rem] border border-white/10 bg-[#07181a]">
+              <div className="flex items-center justify-between border-b border-white/10 bg-black/20 px-4 py-3 backdrop-blur md:px-6">
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-brand-sage">
-                    Product Demo
+                    DeepPatient Overview
                   </p>
                   <h3 className="mt-2 text-lg font-semibold text-white md:text-2xl">
-                    DeepPatient walkthrough placeholder
+                    See what the DeepPatient experience looks like
                   </h3>
                 </div>
                 <div className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/65">
-                  {isDemoPlaying ? "Playing" : "Ready"}
+                  {playbackLabel}
                 </div>
               </div>
 
-              {/* Centre content */}
-              <div className="relative flex h-full items-center justify-center px-6 pt-24 pb-20 text-center md:px-12">
-                <div className="max-w-2xl">
-                  <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-white/15 bg-white/10 shadow-[0_0_40px_rgba(242,176,39,0.2)]">
-                    {isDemoPlaying ? (
-                      <Volume2 className="h-9 w-9 text-brand-sage" />
+              <div className="bg-[radial-gradient(circle_at_top,rgba(242,176,39,0.2),transparent_42%),linear-gradient(135deg,rgba(7,24,26,0.82),rgba(10,34,37,0.96))] p-4 md:p-6">
+                <div className="overflow-hidden rounded-[1.25rem] border border-white/10 bg-black shadow-[0_24px_60px_rgba(0,0,0,0.4)]">
+                  <video
+                    ref={videoRef}
+                    controls
+                    playsInline
+                    preload="metadata"
+                    className="aspect-video w-full bg-black"
+                    src={videoSrc}
+                    onPlay={() => {
+                      setPlaybackLabel("Playing");
+                      setPlaybackHint("Demo is playing.");
+                    }}
+                    onPause={() => {
+                      setPlaybackLabel("Paused");
+                      setPlaybackHint("Playback paused.");
+                    }}
+                    onEnded={() => {
+                      setPlaybackLabel("Finished");
+                      setPlaybackHint("Demo finished. Use replay to watch it again.");
+                    }}
+                    onError={() => {
+                      setPlaybackLabel("Unavailable");
+                      setPlaybackHint(
+                        "The demo video could not be loaded from Dropbox.",
+                      );
+                    }}
+                  />
+                </div>
+
+                <div className="mt-5 flex flex-col gap-3 text-sm text-white/72 md:flex-row md:items-center md:justify-between">
+                  <div className="flex items-center gap-2">
+                    <Play className="h-4 w-4 text-brand-sage" />
+                    <span>Hero CTA scrolls here and restarts playback.</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {playbackLabel === "Playing muted" ? (
+                      <AlertCircle className="h-4 w-4 text-brand-sage" />
                     ) : (
-                      <Play className="ml-1 h-9 w-9 text-white" />
+                      <Volume2 className="h-4 w-4 text-brand-sage" />
                     )}
-                  </div>
-
-                  <h4 className="mt-6 text-2xl font-semibold text-white md:text-4xl">
-                    {isDemoPlaying
-                      ? "Demo playback started"
-                      : "Watch the product walkthrough"}
-                  </h4>
-                  <p className="mt-4 text-sm leading-7 text-white/68 md:text-base">
-                    This is a placeholder player for now. Replace this container
-                    with the final recorded product video when it is ready.
-                  </p>
-
-                  {!isDemoPlaying ? (
-                    <button
-                      type="button"
-                      onClick={() => setHasManualPlaybackStarted(true)}
-                      className="mt-8 inline-flex h-12 items-center justify-center gap-3 rounded-full bg-[#F2B027] px-7 text-sm font-semibold text-brand-forest transition-all hover:brightness-105 cursor-pointer"
-                    >
-                      <Play className="h-4 w-4" />
-                      Play placeholder
-                    </button>
-                  ) : (
-                    <p className="mt-8 text-xs font-medium uppercase tracking-[0.22em] text-brand-sage/90">
-                      Autoplay triggered from the hero CTA
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              {/* Timeline bar */}
-              <div className="absolute inset-x-0 bottom-0 px-4 pb-4 md:px-6 md:pb-6">
-                <div className="rounded-2xl border border-white/10 bg-black/25 px-4 py-4 backdrop-blur">
-                  <div className="flex items-center justify-between text-xs uppercase tracking-[0.22em] text-white/55">
-                    <span>Preview timeline</span>
-                    <span>
-                      {isDemoPlaying ? "00:18 / 01:42" : "00:00 / 01:42"}
-                    </span>
-                  </div>
-                  <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/10">
-                    <div
-                      className={`h-full rounded-full bg-[#F2B027] transition-all duration-700 ${
-                        isDemoPlaying ? "w-[18%]" : "w-0"
-                      }`}
-                    />
+                    <span>{playbackHint}</span>
                   </div>
                 </div>
               </div>

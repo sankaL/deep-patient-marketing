@@ -7,7 +7,7 @@ type FooterCtaSectionProps = {
 
 const FooterCtaSection = ({ onBookDemo }: FooterCtaSectionProps) => {
   return (
-    <section className="relative py-24 md:py-32 bg-black overflow-hidden">
+    <section className="relative py-24 md:py-32 bg-[hsl(187,21%,10%)] overflow-hidden">
       {/* Background glow */}
       <div className="absolute inset-0">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[50rem] h-[25rem] bg-brand-sage/10 rounded-full blur-[10rem]" />

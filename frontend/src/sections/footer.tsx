@@ -3,20 +3,36 @@ import logoWhite from "@/assets/brand/deeppatient-logo-white.svg";
 const footerLinks = [
   {
     heading: "Product",
-    links: ["Features", "Pricing", "Demo"],
+    links: [
+      { label: "Features", href: "#features" },
+      { label: "Pricing", href: "#pricing" },
+      { label: "Demo", href: "#demo" },
+    ],
   },
   {
     heading: "Company",
-    links: ["About", "Contact"],
+    links: [
+      { label: "About", href: "#top" },
+      { label: "Contact", href: "#top" },
+    ],
   },
   {
     heading: "Legal",
-    links: ["Privacy", "Terms", "Security"],
+    links: [
+      { label: "Privacy", href: "#top" },
+      { label: "Terms", href: "#top" },
+      { label: "Security", href: "#top" },
+    ],
   },
 ];
 
 const Footer = () => {
   const year = new Date().getFullYear();
+
+  const scrollToTop = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   return (
     <footer className="bg-black border-t border-white/5 py-12">
@@ -41,12 +57,12 @@ const Footer = () => {
               </h4>
               <ul className="space-y-2.5">
                 {col.links.map((link) => (
-                  <li key={link}>
+                  <li key={link.label}>
                     <a
-                      href="#"
+                      href={link.href}
                       className="text-sm text-gray-500 hover:text-gray-300 transition-colors"
                     >
-                      {link}
+                      {link.label}
                     </a>
                   </li>
                 ))}
@@ -62,13 +78,15 @@ const Footer = () => {
           </span>
           <div className="flex items-center gap-6">
             <a
-              href="#"
+              href="#top"
+              onClick={scrollToTop}
               className="text-gray-600 text-xs hover:text-gray-400 transition-colors"
             >
               Privacy Policy
             </a>
             <a
-              href="#"
+              href="#top"
+              onClick={scrollToTop}
               className="text-gray-600 text-xs hover:text-gray-400 transition-colors"
             >
               Terms of Service

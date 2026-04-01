@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { AdminApp } from "@/admin/admin-app";
 import {
   ContactModal,
   type ContactFormData,
@@ -10,8 +11,9 @@ import { PersonasSection } from "@/sections/personas-section";
 import { PricingSection } from "@/sections/pricing-section";
 import { FooterCtaSection } from "@/sections/footer-cta-section";
 import { Footer } from "@/sections/footer";
+import { submitDemoRequest } from "@/lib/leads";
 
-function App() {
+function MarketingSite() {
   const [demoRequestId, setDemoRequestId] = useState(0);
   const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
 
@@ -20,25 +22,19 @@ function App() {
   };
 
   const handleDemoSubmit = async (_data: ContactFormData) => {
-    void _data;
-    await Promise.resolve();
+    await submitDemoRequest(_data, "book_demo");
   };
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-[hsl(187,21%,10%)]">
       <HeroSection
         onBookDemo={handleBookDemo}
         onWatchDemo={() => setDemoRequestId((id) => id + 1)}
       />
-      {/* Bridge gradient */}
-      <div
-        className="relative -mt-48 h-48 pointer-events-none z-10 bg-gradient-to-b from-transparent to-[hsl(187,21%,10%)]"
-        aria-hidden="true"
-      />
       <IntroVideoSection demoRequestId={demoRequestId} />
       <FeaturesSection />
       <PersonasSection onBookDemo={handleBookDemo} />
-      <PricingSection />
+      <PricingSection onBookDemo={handleBookDemo} />
       <FooterCtaSection onBookDemo={handleBookDemo} />
       <Footer />
       <ContactModal
@@ -57,6 +53,14 @@ function App() {
       />
     </div>
   );
+}
+
+function App() {
+  if (window.location.pathname.startsWith("/admin")) {
+    return <AdminApp />;
+  }
+
+  return <MarketingSite />;
 }
 
 export default App;

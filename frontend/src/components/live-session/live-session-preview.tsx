@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Activity,
   AlertCircle,
@@ -17,6 +17,7 @@ import { motion } from "motion/react";
 
 import { Conversation } from "@/components/cvi/components/conversation";
 import replicaImg from "@/assets/replica-2.png";
+import { submitDemoRequest } from "@/lib/leads";
 
 import { ContactModal } from "./contact-modal";
 import { useTavusPreview } from "./use-tavus-preview";
@@ -44,7 +45,7 @@ function PatientInfoPanel() {
         </div>
         <div>
           <p className="text-[11px] font-semibold leading-tight text-brand-forest">
-            John Miller
+            Darius Miller
           </p>
           <p className="text-[9px] text-brand-forest/50">Male, 31</p>
         </div>
@@ -159,7 +160,7 @@ function PreviewStat({
   return (
     <div className="rounded-2xl border border-brand-forest/8 bg-white/75 px-4 py-3 shadow-[0_15px_30px_-24px_rgba(0,0,0,0.45)] backdrop-blur-sm">
       <div className="flex items-center gap-2 text-brand-forest/50">
-        <Icon className="h-4 w-4 text-brand-sage" />
+        <Icon className="h-4 w-4 text-brand-bark" />
         <span className="text-[10px] font-semibold uppercase tracking-[0.18em]">
           {label}
         </span>
@@ -170,19 +171,45 @@ function PreviewStat({
 }
 
 export function LiveSessionPreview() {
-  const { conversationUrl, errorMessage, isActive, isLoading, resetSession, startSession } =
-    useTavusPreview();
+  const {
+    completeSession,
+    conversationUrl,
+    errorMessage,
+    isActive,
+    isLoading,
+    previewSessionId,
+    resetSession,
+    startSession,
+  } = useTavusPreview();
   const contactModalEnabled = import.meta.env.VITE_CONTACT_MODAL_ENABLED !== "false";
   const [showModal, setShowModal] = useState(false);
+
+  useEffect(() => {
+    if (!previewSessionId || !isActive || !navigator.sendBeacon) {
+      return;
+    }
+
+    const handlePageHide = () => {
+      const body = JSON.stringify({ end_reason: "window_unload" });
+      navigator.sendBeacon(
+        `/api/tavus/preview-sessions/${previewSessionId}/complete`,
+        new Blob([body], { type: "application/json" }),
+      );
+    };
+
+    window.addEventListener("pagehide", handlePageHide);
+    return () => window.removeEventListener("pagehide", handlePageHide);
+  }, [isActive, previewSessionId]);
 
   const handleContactSubmit = async (formData: {
     name: string;
     email: string;
+    institution?: string;
     teamSize?: string;
   }) => {
-    void formData;
+    const demoRequestId = await submitDemoRequest(formData, "live_preview");
     setShowModal(false);
-    await startSession();
+    await startSession({ demoRequestId });
   };
 
   return (
@@ -190,7 +217,7 @@ export function LiveSessionPreview() {
       initial={{ opacity: 0, y: 60 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 1.2, delay: 0.9, ease: [0.25, 0.4, 0.25, 1] }}
-      className="relative mx-auto mb-16 mt-14 w-full max-w-5xl"
+      className="relative mx-auto mb-12 mt-14 w-full max-w-5xl"
     >
       <div className="absolute inset-0 rounded-2xl bg-brand-sage/15 blur-[6rem]" />
       <div className="absolute -inset-4 rounded-2xl bg-gradient-to-b from-brand-sage/8 to-transparent blur-3xl" />
@@ -201,7 +228,7 @@ export function LiveSessionPreview() {
           <div className="h-3 w-3 rounded-full bg-[#FEBC2E] shadow-inner" />
           <div className="h-3 w-3 rounded-full bg-[#28C840] shadow-inner" />
           <span className="ml-3 text-[11px] font-medium text-black/40">
-            {isActive ? "DeepPatient — Live Preview" : "DeepPatient — Live Session"}
+            {isActive ? "DeepPatient Live Preview" : "DeepPatient Live Session"}
           </span>
         </div>
 
@@ -216,23 +243,36 @@ export function LiveSessionPreview() {
                 One scenario • short preview access
               </p>
             </div>
-            <Conversation conversationUrl={conversationUrl} onLeave={resetSession} />
+            <Conversation
+              conversationUrl={conversationUrl}
+              onLeave={() => {
+                void completeSession("client_closed");
+                resetSession();
+              }}
+            />
           </div>
         ) : (
           <div className="grid min-h-[480px] md:grid-cols-[minmax(0,1.4fr)_240px]">
             <div className="relative flex flex-col justify-between overflow-hidden p-6 text-left md:p-10">
-              <div
-                className="absolute inset-0 bg-cover bg-center"
-                style={{ backgroundImage: `url(${replicaImg})` }}
-              />
-              <div className="absolute inset-0 bg-white/90 backdrop-blur-2xl" />
+              <div className="absolute inset-0 bg-[#12181b]" />
+              <div className="absolute -bottom-20 left-0 h-64 w-64 rounded-full bg-brand-sage/12 blur-3xl" />
+              <div className="absolute inset-0 hidden items-center justify-center md:flex">
+                <img
+                  src={replicaImg}
+                  alt=""
+                  aria-hidden="true"
+                  className="pointer-events-none h-full w-full max-w-none object-cover object-center opacity-100 blur-[8px] saturate-[0.74] brightness-[0.42] contrast-[1.16]"
+                />
+              </div>
+              <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(8,12,14,0.78)_0%,rgba(8,12,14,0.68)_34%,rgba(8,12,14,0.54)_62%,rgba(8,12,14,0.7)_100%)]" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(172,118,76,0.16),rgba(172,118,76,0.08)_24%,rgba(8,12,14,0.22)_52%,rgba(8,12,14,0.36)_100%)]" />
               <div className="relative z-10">
-                <div className="inline-flex items-center gap-2 rounded-full border border-brand-sage/40 bg-brand-sage/12 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-brand-forest">
-                  <Video className="h-4 w-4 text-brand-bark" />
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-brand-bark px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-white shadow-[0_18px_38px_-22px_rgba(0,0,0,0.7)]">
+                  <Video className="h-4 w-4 text-brand-cream" />
                   DeepPatient Live Preview
                 </div>
 
-                <h3 className="mt-5 max-w-2xl text-3xl font-semibold tracking-tight text-brand-forest md:text-4xl">
+                <h3 className="mt-5 max-w-2xl text-3xl font-semibold tracking-tight text-white md:text-4xl">
                   Start a real AI patient conversation.
                 </h3>
 
@@ -247,7 +287,9 @@ export function LiveSessionPreview() {
                 <div className="flex flex-col gap-3 sm:flex-row">
                   <button
                     type="button"
-                    onClick={() => contactModalEnabled ? setShowModal(true) : startSession()}
+                    onClick={() =>
+                      contactModalEnabled ? setShowModal(true) : startSession()
+                    }
                     disabled={isLoading}
                     className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-success px-8 text-base font-semibold text-white shadow-[0_0_32px_hsl(120,41%,30%,0.28)] transition-all hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-65"
                   >
@@ -273,7 +315,7 @@ export function LiveSessionPreview() {
                   </div>
                 ) : null}
 
-                <p className="mt-4 text-xs leading-6 text-brand-forest/48">
+                <p className="mt-4 text-xs leading-6 text-white/72">
                   By starting the preview you will join a live AI session and be prompted for
                   microphone and camera access.
                 </p>

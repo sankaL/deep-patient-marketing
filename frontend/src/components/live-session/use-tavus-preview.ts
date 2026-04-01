@@ -6,6 +6,7 @@ interface TavusConversationResponse {
   conversation_id: string;
   conversation_url: string;
   status: string;
+  preview_session_id: string;
 }
 
 interface TavusErrorResponse {
@@ -40,10 +41,11 @@ function readErrorMessage(payload: TavusErrorResponse | TavusConversationRespons
 
 export function useTavusPreview() {
   const [conversationUrl, setConversationUrl] = useState<string | null>(null);
+  const [previewSessionId, setPreviewSessionId] = useState<string | null>(null);
   const [status, setStatus] = useState<TavusPreviewState>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const startSession = async () => {
+  const startSession = async (options?: { demoRequestId?: string }) => {
     if (status === "loading" || conversationUrl) {
       return;
     }
@@ -52,7 +54,13 @@ export function useTavusPreview() {
     setErrorMessage(null);
 
     try {
-      const response = await fetch("/api/tavus/conversation", { method: "POST" });
+      const response = await fetch("/api/tavus/conversation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          demo_request_id: options?.demoRequestId ?? null,
+        }),
+      });
       const payload = (await response.json().catch(() => null)) as
         | TavusConversationResponse
         | TavusErrorResponse
@@ -66,16 +74,20 @@ export function useTavusPreview() {
         !payload ||
         typeof payload !== "object" ||
         !("conversation_url" in payload) ||
-        typeof payload.conversation_url !== "string" ||
-        !payload.conversation_url
+          typeof payload.conversation_url !== "string" ||
+          !payload.conversation_url ||
+          typeof payload.preview_session_id !== "string" ||
+          !payload.preview_session_id
       ) {
         throw new Error(DEFAULT_ERROR_MESSAGE);
       }
 
       setConversationUrl(payload.conversation_url);
+      setPreviewSessionId(payload.preview_session_id);
       setStatus("active");
     } catch (error) {
       setConversationUrl(null);
+      setPreviewSessionId(null);
       setStatus("error");
       setErrorMessage(
         error instanceof Error && error.message
@@ -85,17 +97,42 @@ export function useTavusPreview() {
     }
   };
 
+  const completeSession = async (endReason: "client_closed" | "window_unload") => {
+    const currentPreviewSessionId = previewSessionId;
+
+    if (currentPreviewSessionId) {
+      try {
+        await fetch(`/api/tavus/preview-sessions/${currentPreviewSessionId}/complete`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ end_reason: endReason }),
+          keepalive: endReason === "window_unload",
+        });
+      } catch {
+        // Best-effort completion keeps the UI responsive if the user leaves abruptly.
+      }
+    }
+
+    setConversationUrl(null);
+    setPreviewSessionId(null);
+    setStatus("idle");
+    setErrorMessage(null);
+  };
+
   const resetSession = () => {
     setConversationUrl(null);
+    setPreviewSessionId(null);
     setStatus("idle");
     setErrorMessage(null);
   };
 
   return {
     conversationUrl,
+    completeSession,
     errorMessage,
     isActive: status === "active" && Boolean(conversationUrl),
     isLoading: status === "loading",
+    previewSessionId,
     resetSession,
     startSession,
     status,
