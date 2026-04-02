@@ -6,6 +6,8 @@ The repository now includes a dedicated production deployment path for:
 
 - `backend/Dockerfile.railway` for the FastAPI API on Railway
 - `frontend/Dockerfile.railway` for a built React app served by nginx on Railway
+- `backend/railway.json` for backend Railway build and deploy settings
+- `frontend/railway.json` for frontend Railway build and deploy settings
 - `frontend/nginx/default.conf.template` to proxy `/api` to a private backend service so the public site and admin cookies stay same-origin
 
 Recommended production topology:
@@ -14,10 +16,17 @@ Recommended production topology:
 - private Railway service: `backend`
 - hosted Supabase project with the existing migrations in `supabase/migrations/`
 
+For Railway config-as-code, point each service at its committed custom config file:
+
+- backend service config path: `/backend/railway.json`
+- frontend service config path: `/frontend/railway.json`
+
+For the full Railway setup and main-branch auto-deploy checklist, see `docs/railway-deployment.md`.
+
 Key production variables:
 
 - backend: `SUPABASE_MODE=remote`, `SUPABASE_URL`, `SUPABASE_AUTH_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`, `FROM_EMAIL`, `SALES_EMAIL`, `PRODUCT_VIDEO_URL`, `TAVUS_API_KEY_ENCRYPTION_KEY`, `ADMIN_EMAIL`, `ADMIN_EMAILS`, `MARKETING_SITE_URL`
-- frontend: `BACKEND_UPSTREAM_URL` pointing at the backend Railway private URL
+- frontend: `BACKEND_UPSTREAM_URL` pointing at the backend Railway private URL, typically `http://${{backend.RAILWAY_PRIVATE_DOMAIN}}:8000`
 
 The frontend keeps relative `/api` calls in production; nginx proxies them to the private backend service.
 Set `MARKETING_SITE_URL` to the public frontend URL users actually hit. If you attach a custom domain such as `deeppatient.io`, its DNS must point at the Railway `frontend` service or production tests and email links will hit a different site.
