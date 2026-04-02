@@ -1,4 +1,27 @@
-# DeepPatient Marketing Local Docker Workflow
+# DeepPatient Marketing
+
+## Production deployment
+
+The repository now includes a dedicated production deployment path for:
+
+- `backend/Dockerfile.railway` for the FastAPI API on Railway
+- `frontend/Dockerfile.railway` for a built React app served by nginx on Railway
+- `frontend/nginx/default.conf.template` to proxy `/api` to a private backend service so the public site and admin cookies stay same-origin
+
+Recommended production topology:
+
+- public Railway service: `frontend`
+- private Railway service: `backend`
+- hosted Supabase project with the existing migrations in `supabase/migrations/`
+
+Key production variables:
+
+- backend: `SUPABASE_MODE=remote`, `SUPABASE_URL`, `SUPABASE_AUTH_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`, `TAVUS_API_KEY_ENCRYPTION_KEY`, `ADMIN_EMAIL`, `ADMIN_EMAILS`, `MARKETING_SITE_URL`
+- frontend: `BACKEND_UPSTREAM_URL` pointing at the backend Railway private URL
+
+The frontend keeps relative `/api` calls in production; nginx proxies them to the private backend service.
+
+## Local Docker workflow
 
 This repository now includes a containerized development stack for the frontend, backend, and an optional local Supabase-compatible data stack.
 
