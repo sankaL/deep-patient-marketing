@@ -2,7 +2,7 @@
   "name": "DeepPatient",
   "short_name": "DeepPatient",
   "description": "AI-powered clinical skills training for medical institutions",
-  "start_url": "https://deeppatient.io/",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#202F31",
   "theme_color": "#202F31",

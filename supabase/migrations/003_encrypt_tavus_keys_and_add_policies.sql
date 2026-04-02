@@ -51,8 +51,8 @@ AS $$
     SELECT k.id,
            CASE
                WHEN k.api_key_secret LIKE 'enc:%'
-                   THEN pgp_sym_decrypt(
-                       dearmor(substr(k.api_key_secret, 5)),
+                   THEN extensions.pgp_sym_decrypt(
+                       extensions.dearmor(substr(k.api_key_secret, 5)),
                        btrim(p_encryption_key)
                    )
                ELSE k.api_key_secret
@@ -132,8 +132,8 @@ BEGIN
         activated_at
     )
     VALUES (
-        'enc:' || armor(
-            pgp_sym_encrypt(
+        'enc:' || extensions.armor(
+            extensions.pgp_sym_encrypt(
                 btrim(p_new_api_key_secret),
                 btrim(p_encryption_key),
                 'cipher-algo=aes256'

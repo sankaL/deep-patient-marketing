@@ -6,11 +6,9 @@ from pathlib import Path
 from typing import Any
 
 
-SCENARIO_CONFIG_PATH = (
-    Path(__file__).resolve().parents[2] / "docs" / "scenario" / "config.py"
-)
+SCENARIO_CONFIG_PATH = Path(__file__).resolve().parents[1] / "scenario" / "config.py"
 SCENARIO_PROMPT_PATH = (
-    Path(__file__).resolve().parents[2] / "docs" / "scenario" / "system-prompt.md"
+    Path(__file__).resolve().parents[1] / "scenario" / "system-prompt.md"
 )
 
 

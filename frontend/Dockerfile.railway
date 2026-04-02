@@ -16,7 +16,7 @@ RUN apk add --no-cache gettext
 WORKDIR /usr/share/nginx/html
 
 COPY --from=build /app/dist ./
-COPY nginx/default.conf.template /etc/nginx/templates/default.conf.template
+COPY nginx/default.conf.template /opt/nginx/default.conf.template
 COPY scripts/docker-entrypoint.sh /docker-entrypoint.d/99-render-config.sh
 
 RUN chmod +x /docker-entrypoint.d/99-render-config.sh

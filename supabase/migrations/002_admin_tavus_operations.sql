@@ -194,8 +194,8 @@ BEGIN
         activated_at
     )
     VALUES (
-        'enc:' || armor(
-            pgp_sym_encrypt(
+        'enc:' || extensions.armor(
+            extensions.pgp_sym_encrypt(
                 btrim(p_new_api_key_secret),
                 btrim(p_encryption_key),
                 'cipher-algo=aes256'
