@@ -13,6 +13,7 @@ from dependencies import (
 )
 from models.tavus import (
     TavusPreviewRuntimeState,
+    TavusPreviewSessionCleanupContext,
     TavusPreviewSessionCompletionResult,
     TavusPreviewSessionRecord,
     TavusUsageRollup,
@@ -26,11 +27,11 @@ def _runtime_settings() -> TavusRuntimeSettings:
     return TavusRuntimeSettings(
         api_base_url="https://tavus.example.com/v2",
         conversation_name="DeepPatient Live Session",
-        require_auth=True,
+        require_auth=False,
         max_participants=2,
         preview_cooldown_seconds=0,
         request_timeout_seconds=20.0,
-        preview_max_duration_seconds=300,
+        preview_max_duration_seconds=180,
         api_key_encryption_key="encryption-key",
     )
 
@@ -80,6 +81,12 @@ class FakeTavusPreviewStateService:
         self._runtime_state = runtime_state
         self.preview_session_id = uuid4()
         self.fail_create_preview_session = False
+        self.cleanup_context = TavusPreviewSessionCleanupContext(
+            preview_session_id=self.preview_session_id,
+            conversation_id="conversation_123",
+            api_key_secret="secret",
+            already_completed=False,
+        )
 
     async def close_expired_preview_sessions(self, *, preview_max_duration_seconds: int):
         return []
@@ -97,6 +104,19 @@ class FakeTavusPreviewStateService:
         return TavusPreviewSessionRecord(
             preview_session_id=self.preview_session_id,
             tavus_api_key_id=runtime_state.tavus_api_key_id,
+        )
+
+    async def get_preview_session_cleanup_context(
+        self, *, preview_session_id, api_key_encryption_key: str
+    ):
+        if self.cleanup_context is None:
+            return None
+
+        return TavusPreviewSessionCleanupContext(
+            preview_session_id=preview_session_id,
+            conversation_id=self.cleanup_context.conversation_id,
+            api_key_secret=self.cleanup_context.api_key_secret,
+            already_completed=self.cleanup_context.already_completed,
         )
 
     async def complete_preview_session(
@@ -163,7 +183,7 @@ async def _fake_create_conversation(runtime_state, settings):
     )
 
 
-async def _fake_delete_conversation(runtime_state, settings, *, conversation_id: str):
+async def _fake_delete_conversation(*, api_key_secret: str, settings, conversation_id: str):
     return None
 
 
@@ -217,6 +237,11 @@ def test_start_tavus_conversation_fails_closed_without_active_runtime(monkeypatc
 
 
 def test_complete_preview_session_returns_duration(monkeypatch):
+    cleanup_calls: list[str] = []
+
+    async def _record_delete(*, api_key_secret: str, settings, conversation_id: str):
+        cleanup_calls.append(conversation_id)
+
     app.dependency_overrides[get_tavus_admin_service] = lambda: FakeTavusAdminService()
     app.dependency_overrides[get_tavus_preview_state_service] = (
         lambda: FakeTavusPreviewStateService(_runtime_state())
@@ -225,6 +250,7 @@ def test_complete_preview_session_returns_duration(monkeypatch):
         lambda: FakeNotificationService()
     )
     monkeypatch.setattr(tavus_routes, "get_tavus_runtime_config", _runtime_settings)
+    monkeypatch.setattr(tavus_routes, "delete_conversation", _record_delete)
 
     preview_session_id = uuid4()
 
@@ -241,6 +267,43 @@ def test_complete_preview_session_returns_duration(monkeypatch):
     payload = response.json()
     assert payload["preview_session_id"] == str(preview_session_id)
     assert payload["duration_seconds_estimate"] == 149
+    assert cleanup_calls == ["conversation_123"]
+
+
+def test_complete_preview_session_skips_tavus_delete_when_already_completed(monkeypatch):
+    fake_state_service = FakeTavusPreviewStateService(_runtime_state())
+    fake_state_service.cleanup_context = TavusPreviewSessionCleanupContext(
+        preview_session_id=fake_state_service.preview_session_id,
+        conversation_id="conversation_123",
+        api_key_secret="secret",
+        already_completed=True,
+    )
+    cleanup_calls: list[str] = []
+
+    async def _record_delete(*, api_key_secret: str, settings, conversation_id: str):
+        cleanup_calls.append(conversation_id)
+
+    app.dependency_overrides[get_tavus_admin_service] = lambda: FakeTavusAdminService()
+    app.dependency_overrides[get_tavus_preview_state_service] = lambda: fake_state_service
+    app.dependency_overrides[get_notification_service] = (
+        lambda: FakeNotificationService()
+    )
+    monkeypatch.setattr(tavus_routes, "get_tavus_runtime_config", _runtime_settings)
+    monkeypatch.setattr(tavus_routes, "delete_conversation", _record_delete)
+
+    preview_session_id = uuid4()
+
+    try:
+        client = create_client()
+        response = client.post(
+            f"/api/tavus/preview-sessions/{preview_session_id}/complete",
+            json={"end_reason": "client_closed"},
+        )
+    finally:
+        app.dependency_overrides.clear()
+
+    assert response.status_code == 200
+    assert cleanup_calls == []
 
 
 def test_start_tavus_conversation_cleans_up_tavus_conversation_on_db_failure(
@@ -250,7 +313,7 @@ def test_start_tavus_conversation_cleans_up_tavus_conversation_on_db_failure(
     fake_state_service.fail_create_preview_session = True
     cleanup_calls: list[str] = []
 
-    async def _record_delete(runtime_state, settings, *, conversation_id: str):
+    async def _record_delete(*, api_key_secret: str, settings, conversation_id: str):
         cleanup_calls.append(conversation_id)
 
     app.dependency_overrides[get_tavus_preview_state_service] = lambda: fake_state_service

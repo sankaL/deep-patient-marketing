@@ -302,8 +302,8 @@ async def start_tavus_conversation(
         if conversation is not None:
             try:
                 await delete_conversation(
-                    runtime_state,
-                    runtime_settings,
+                    api_key_secret=runtime_state.api_key_secret,
+                    settings=runtime_settings,
                     conversation_id=conversation.conversation_id,
                 )
             except TavusServiceError:
@@ -343,6 +343,40 @@ async def complete_tavus_preview_session(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail=str(exc),
         ) from exc
+
+    try:
+        cleanup_context = await runtime_state_service.get_preview_session_cleanup_context(
+            preview_session_id=preview_session_id,
+            api_key_encryption_key=runtime_settings.api_key_encryption_key,
+        )
+    except SupabaseRestError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail="The live preview session could not be completed right now.",
+        ) from exc
+
+    if cleanup_context is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="The live preview session was not found.",
+        )
+
+    if not cleanup_context.already_completed:
+        try:
+            await delete_conversation(
+                api_key_secret=cleanup_context.api_key_secret,
+                settings=runtime_settings,
+                conversation_id=cleanup_context.conversation_id,
+            )
+        except TavusServiceError as exc:
+            logger.exception(
+                "Tavus conversation cleanup failed while completing preview session.",
+                extra={"conversation_id": cleanup_context.conversation_id},
+            )
+            raise HTTPException(
+                status_code=exc.status_code,
+                detail="The live preview session could not be completed right now.",
+            ) from exc
 
     try:
         expired_rollups = await runtime_state_service.close_expired_preview_sessions(

@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 type TavusPreviewState = "idle" | "loading" | "active" | "error";
+type TavusPreviewEndReason = "client_closed" | "window_unload" | "timeout" | "error";
 
 interface TavusConversationResponse {
   conversation_id: string;
@@ -97,7 +98,13 @@ export function useTavusPreview() {
     }
   };
 
-  const completeSession = async (endReason: "client_closed" | "window_unload") => {
+  const completeSession = async (
+    endReason: TavusPreviewEndReason,
+    options?: {
+      errorMessage?: string | null;
+      nextStatus?: TavusPreviewState;
+    },
+  ) => {
     const currentPreviewSessionId = previewSessionId;
 
     if (currentPreviewSessionId) {
@@ -115,8 +122,8 @@ export function useTavusPreview() {
 
     setConversationUrl(null);
     setPreviewSessionId(null);
-    setStatus("idle");
-    setErrorMessage(null);
+    setStatus(options?.nextStatus ?? "idle");
+    setErrorMessage(options?.errorMessage ?? null);
   };
 
   const resetSession = () => {

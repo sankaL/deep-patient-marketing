@@ -7,6 +7,7 @@ from uuid import UUID
 from models.tavus import (
     PreviewSessionEndReason,
     TavusPreviewRuntimeState,
+    TavusPreviewSessionCleanupContext,
     TavusPreviewSessionCompletionResult,
     TavusPreviewSessionRecord,
     TavusUsageRollup,
@@ -53,6 +54,30 @@ class TavusPreviewStateService:
         return TavusPreviewSessionRecord(
             preview_session_id=UUID(str(row["id"])),
             tavus_api_key_id=runtime_state.tavus_api_key_id,
+        )
+
+    async def get_preview_session_cleanup_context(
+        self,
+        *,
+        preview_session_id: UUID,
+        api_key_encryption_key: str,
+    ) -> TavusPreviewSessionCleanupContext | None:
+        result = await self._supabase.rpc(
+            "get_preview_session_cleanup_context",
+            {
+                "p_preview_session_id": str(preview_session_id),
+                "p_encryption_key": api_key_encryption_key,
+            },
+        )
+        row = result.first()
+        if row is None:
+            return None
+
+        return TavusPreviewSessionCleanupContext(
+            preview_session_id=UUID(str(row["preview_session_id"])),
+            conversation_id=str(row["conversation_id"]),
+            api_key_secret=str(row["api_key_secret"]),
+            already_completed=bool(row["already_completed"]),
         )
 
     async def close_expired_preview_sessions(

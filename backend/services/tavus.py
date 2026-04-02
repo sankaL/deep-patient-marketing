@@ -112,13 +112,13 @@ async def create_conversation(
 
 
 async def delete_conversation(
-    runtime_state: TavusPreviewRuntimeState,
-    settings: TavusRuntimeSettings,
     *,
+    api_key_secret: str,
+    settings: TavusRuntimeSettings,
     conversation_id: str,
 ) -> None:
     headers = {
-        "x-api-key": runtime_state.api_key_secret,
+        "x-api-key": api_key_secret,
     }
 
     try:

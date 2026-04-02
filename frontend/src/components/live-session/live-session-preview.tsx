@@ -22,6 +22,10 @@ import { submitDemoRequest } from "@/lib/leads";
 import { ContactModal } from "./contact-modal";
 import { useTavusPreview } from "./use-tavus-preview";
 
+const PREVIEW_MAX_DURATION_MS = 180 * 1000;
+const PREVIEW_TIMEOUT_MESSAGE =
+  "The live preview ended automatically after 3 minutes.";
+
 function HeartRateSparkline() {
   return (
     <svg viewBox="0 0 120 32" className="h-8 w-full" fill="none">
@@ -178,7 +182,6 @@ export function LiveSessionPreview() {
     isActive,
     isLoading,
     previewSessionId,
-    resetSession,
     startSession,
   } = useTavusPreview();
   const contactModalEnabled = import.meta.env.VITE_CONTACT_MODAL_ENABLED !== "false";
@@ -200,6 +203,21 @@ export function LiveSessionPreview() {
     window.addEventListener("pagehide", handlePageHide);
     return () => window.removeEventListener("pagehide", handlePageHide);
   }, [isActive, previewSessionId]);
+
+  useEffect(() => {
+    if (!previewSessionId || !isActive) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      void completeSession("timeout", {
+        errorMessage: PREVIEW_TIMEOUT_MESSAGE,
+        nextStatus: "error",
+      });
+    }, PREVIEW_MAX_DURATION_MS);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [completeSession, isActive, previewSessionId]);
 
   const handleContactSubmit = async (formData: {
     name: string;
@@ -245,9 +263,11 @@ export function LiveSessionPreview() {
             </div>
             <Conversation
               conversationUrl={conversationUrl}
-              onLeave={() => {
-                void completeSession("client_closed");
-                resetSession();
+              onLeave={(options) => {
+                void completeSession(options?.endReason ?? "client_closed", {
+                  errorMessage: options?.errorMessage ?? null,
+                  nextStatus: options?.errorMessage ? "error" : "idle",
+                });
               }}
             />
           </div>
@@ -277,7 +297,7 @@ export function LiveSessionPreview() {
                 </h3>
 
                 <div className="mt-8 grid gap-3 sm:grid-cols-3">
-                  <PreviewStat icon={Clock3} label="Preview" value="2 to 5 minute live session" />
+                  <PreviewStat icon={Clock3} label="Preview" value="3 minute live session max" />
                   <PreviewStat icon={ShieldCheck} label="Scope" value="Single scenario for quick evaluation" />
                   <PreviewStat icon={Video} label="Access" value="Camera and microphone required" />
                 </div>

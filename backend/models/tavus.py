@@ -39,6 +39,14 @@ class TavusPreviewSessionRecord:
 
 
 @dataclass(frozen=True)
+class TavusPreviewSessionCleanupContext:
+    preview_session_id: UUID
+    conversation_id: str
+    api_key_secret: str
+    already_completed: bool
+
+
+@dataclass(frozen=True)
 class TavusUsageRollup:
     tavus_api_key_id: UUID
     tavus_api_key_status: str

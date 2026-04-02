@@ -161,7 +161,7 @@ def get_tavus_admin_runtime_settings() -> TavusRuntimeSettings:
 def get_tavus_preview_max_duration_seconds() -> int:
     load_environment()
 
-    return _read_int("TAVUS_PREVIEW_MAX_DURATION_SECONDS", 300, minimum=30)
+    return _read_int("TAVUS_PREVIEW_MAX_DURATION_SECONDS", 180, minimum=30)
 
 
 def _get_tavus_runtime_settings(
@@ -179,7 +179,7 @@ def _get_tavus_runtime_settings(
             "TAVUS_CONVERSATION_NAME", "DeepPatient Live Session"
         ).strip()
         or "DeepPatient Live Session",
-        require_auth=_read_bool("TAVUS_PREVIEW_REQUIRE_AUTH", True),
+        require_auth=_read_bool("TAVUS_PREVIEW_REQUIRE_AUTH", False),
         max_participants=_read_int("TAVUS_PREVIEW_MAX_PARTICIPANTS", 2, minimum=2),
         preview_cooldown_seconds=_read_int(
             "TAVUS_PREVIEW_COOLDOWN_SECONDS", 120, minimum=0

@@ -1,7 +1,8 @@
-import React, { useEffect, useCallback } from "react";
+import React, { useEffect, useCallback, useRef } from "react";
 import {
 	DailyAudioTrack,
 	DailyVideo,
+	useDaily,
 	useDevices,
 	useLocalSessionId,
 	useMeetingState,
@@ -16,9 +17,36 @@ import { AudioWave } from "../audio-wave";
 
 import styles from "./conversation.module.css";
 
+type LeaveReason = "client_closed" | "error";
+
 interface ConversationProps {
-	onLeave: () => void;
+	onLeave: (options?: { endReason?: LeaveReason; errorMessage?: string }) => void;
 	conversationUrl: string;
+}
+
+const DEFAULT_JOIN_ERROR_MESSAGE =
+	"The live preview could not be joined right now. Please try starting a new session.";
+
+function getDailyErrorMessage(error: unknown): string {
+	if (
+		error &&
+		typeof error === "object" &&
+		"errorMsg" in error &&
+		typeof error.errorMsg === "string" &&
+		error.errorMsg.trim()
+	) {
+		if (error.errorMsg === "You are not allowed to join this meeting") {
+			return "The live preview could not be joined right now. Please start a new session.";
+		}
+
+		return error.errorMsg;
+	}
+
+	if (error instanceof Error && error.message.trim()) {
+		return error.message;
+	}
+
+	return DEFAULT_JOIN_ERROR_MESSAGE;
 }
 
 const VideoPreview = React.memo(({ id }: { id: string }) => {
@@ -97,28 +125,69 @@ const MainVideo = React.memo(() => {
 
 export const Conversation = React.memo(({ onLeave, conversationUrl }: ConversationProps) => {
 	const { joinCall, leaveCall } = useCVICall();
+	const daily = useDaily();
 	const meetingState = useMeetingState();
 	const { hasMicError } = useDevices();
+	const hasLeftRef = useRef(false);
 
-	const handleLeave = useCallback(() => {
+	const handleLeave = useCallback((options?: { endReason?: LeaveReason; errorMessage?: string }) => {
+		if (hasLeftRef.current) {
+			return;
+		}
+
+		hasLeftRef.current = true;
 		leaveCall();
-		onLeave();
+		onLeave(options);
 	}, [leaveCall, onLeave]);
 
 	useEffect(() => {
 		if (meetingState === 'error') {
-			handleLeave();
+			handleLeave({
+				endReason: "error",
+				errorMessage: DEFAULT_JOIN_ERROR_MESSAGE,
+			});
 		}
 	}, [handleLeave, meetingState]);
 
+	useEffect(() => {
+		if (!daily) {
+			return;
+		}
+
+		const handleDailyError = (event: unknown) => {
+			handleLeave({
+				endReason: "error",
+				errorMessage: getDailyErrorMessage(event),
+			});
+		};
+
+		daily.on("error", handleDailyError);
+		return () => {
+			daily.off("error", handleDailyError);
+		};
+	}, [daily, handleLeave]);
+
 	// Initialize call when conversation is available
 	useEffect(() => {
-		joinCall({ url: conversationUrl });
+		let isMounted = true;
+		hasLeftRef.current = false;
+
+		void joinCall({ url: conversationUrl }).catch((error) => {
+			if (!isMounted) {
+				return;
+			}
+
+			handleLeave({
+				endReason: "error",
+				errorMessage: getDailyErrorMessage(error),
+			});
+		});
 
 		return () => {
+			isMounted = false;
 			leaveCall();
 		};
-	}, [conversationUrl, joinCall, leaveCall]);
+	}, [conversationUrl, handleLeave, joinCall, leaveCall]);
 
 	return (
 		<div className={styles.container}>
@@ -148,7 +217,11 @@ export const Conversation = React.memo(({ onLeave, conversationUrl }: Conversati
 					<MicSelectBtn />
 					<CameraSelectBtn />
 					<ScreenShareButton />
-					<button type="button" className={styles.leaveButton} onClick={handleLeave}>
+					<button
+						type="button"
+						className={styles.leaveButton}
+						onClick={() => handleLeave({ endReason: "client_closed" })}
+					>
 						<span className={styles.leaveButtonIcon}>
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
