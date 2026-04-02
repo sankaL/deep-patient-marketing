@@ -16,10 +16,11 @@ Recommended production topology:
 
 Key production variables:
 
-- backend: `SUPABASE_MODE=remote`, `SUPABASE_URL`, `SUPABASE_AUTH_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`, `TAVUS_API_KEY_ENCRYPTION_KEY`, `ADMIN_EMAIL`, `ADMIN_EMAILS`, `MARKETING_SITE_URL`
+- backend: `SUPABASE_MODE=remote`, `SUPABASE_URL`, `SUPABASE_AUTH_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`, `FROM_EMAIL`, `SALES_EMAIL`, `PRODUCT_VIDEO_URL`, `TAVUS_API_KEY_ENCRYPTION_KEY`, `ADMIN_EMAIL`, `ADMIN_EMAILS`, `MARKETING_SITE_URL`
 - frontend: `BACKEND_UPSTREAM_URL` pointing at the backend Railway private URL
 
 The frontend keeps relative `/api` calls in production; nginx proxies them to the private backend service.
+Set `MARKETING_SITE_URL` to the public frontend URL users actually hit. If you attach a custom domain such as `deeppatient.io`, its DNS must point at the Railway `frontend` service or production tests and email links will hit a different site.
 
 ## Local Docker workflow
 

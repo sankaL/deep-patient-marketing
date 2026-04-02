@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass
 from datetime import datetime, timezone
+from email.utils import parseaddr
 
 from config import NotificationSettings
 from models.public import DemoRequest, PricingInquiryRequest
@@ -42,8 +43,9 @@ class NotificationService:
         if not resend or not self._settings.resend_api_key:
             raise RuntimeError("Resend is not configured.")
 
+        from_header = self._format_from_header()
         payload = {
-            "from": self._format_from_header(),
+            "from": from_header,
             "to": to,
             "subject": subject,
             "html": html_body,
@@ -52,7 +54,29 @@ class NotificationService:
         if reply_to:
             payload["reply_to"] = reply_to
 
-        resend.Emails.send(payload)
+        log_context = {
+            "subject": subject,
+            "from_domain": _email_domain(from_header),
+            "recipient_count": len(to),
+            "recipient_domains": _email_domains(to),
+            "reply_to_domains": _email_domains(reply_to or []),
+        }
+
+        try:
+            response = resend.Emails.send(payload)
+        except Exception:
+            logger.exception("Resend email send failed.", extra=log_context)
+            raise
+
+        message_id = (
+            response.get("id")
+            if isinstance(response, dict) and isinstance(response.get("id"), str)
+            else None
+        )
+        logger.info(
+            "Resend email sent.",
+            extra={**log_context, "message_id": message_id},
+        )
         return True
 
     def _format_from_header(self) -> str:
@@ -268,3 +292,19 @@ def _format_seconds(total_seconds: int) -> str:
         parts.append(f"{minutes}m")
     parts.append(f"{seconds}s")
     return " ".join(parts)
+
+
+def _email_domain(value: str) -> str | None:
+    _, address = parseaddr(value)
+    if "@" not in address:
+        return None
+    return address.rsplit("@", 1)[1].lower()
+
+
+def _email_domains(values: list[str]) -> list[str]:
+    domains = {
+        domain
+        for value in values
+        if (domain := _email_domain(value)) is not None
+    }
+    return sorted(domains)
