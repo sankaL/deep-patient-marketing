@@ -152,6 +152,53 @@ function PatientInfoPanel() {
   );
 }
 
+function MobilePatientScenarioCard() {
+  return (
+    <div className="mt-4 rounded-2xl border border-white/10 bg-white/8 p-4 text-left backdrop-blur-sm md:hidden">
+      <div className="flex items-center gap-2">
+        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-cream/12">
+          <User className="h-4 w-4 text-brand-cream" />
+        </div>
+        <div>
+          <p className="text-sm font-semibold text-white">Darius Miller</p>
+          <p className="text-xs text-white/60">Male, 31</p>
+        </div>
+      </div>
+
+      <div className="mt-4 rounded-xl border border-white/8 bg-black/10 p-3">
+        <div className="flex items-center gap-1.5">
+          <FileText className="h-3.5 w-3.5 text-brand-cream" />
+          <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/55">
+            Scenario
+          </span>
+        </div>
+
+        <div className="mt-3 space-y-3">
+          <div>
+            <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-white/45">
+              Chief Complaint
+            </p>
+            <p className="mt-1 text-sm font-medium leading-snug text-white">
+              Low mood and loss of interest for 3 months
+            </p>
+          </div>
+
+          <div className="h-px bg-white/8" />
+
+          <div>
+            <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-white/45">
+              History
+            </p>
+            <p className="mt-1 text-sm leading-snug text-white/72">
+              Recently divorced. Works as senior IT analyst. No prior depressive episodes.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function PreviewStat({
   icon: Icon,
   label,
@@ -313,13 +360,26 @@ export function LiveSessionPreview() {
 
                 <div className="mt-4 grid gap-2 sm:mt-8 sm:grid-cols-3 sm:gap-3">
                   <PreviewStat icon={Clock3} label="Preview" value="3 minute live session max" />
-                  <PreviewStat icon={ShieldCheck} label="Scope" value="Single scenario for quick evaluation" />
-                  <PreviewStat icon={Video} label="Access" value="Camera and microphone required" />
+                  <div className="hidden sm:block">
+                    <PreviewStat
+                      icon={ShieldCheck}
+                      label="Scope"
+                      value="Single scenario for quick evaluation"
+                    />
+                  </div>
+                  <div className="hidden sm:block">
+                    <PreviewStat
+                      icon={Video}
+                      label="Access"
+                      value="Camera and microphone required"
+                    />
+                  </div>
                 </div>
               </div>
 
               <div className="relative z-10 mt-3 sm:mt-8 md:text-center">
-                <div className="flex flex-col gap-3 sm:flex-row md:justify-center">
+                <MobilePatientScenarioCard />
+                <div className="mt-4 flex flex-col gap-3 sm:mt-0 sm:flex-row md:justify-center">
                   <button
                     type="button"
                     onClick={() =>
