@@ -54,17 +54,16 @@ async def demo_request(
             detail="We could not capture your request right now. Please try again later.",
         ) from exc
 
-    if payload.request_source == "book_demo":
-        try:
-            await notifications.send_demo_request_notifications(payload)
-        except Exception:
-            logger.exception(
-                "Demo request notifications failed.",
-                extra={
-                    "request_id": str(captured.request_id),
-                    "request_source": payload.request_source,
-                },
-            )
+    try:
+        await notifications.send_demo_request_notifications(payload)
+    except Exception:
+        logger.exception(
+            "Demo request notifications failed.",
+            extra={
+                "request_id": str(captured.request_id),
+                "request_source": payload.request_source,
+            },
+        )
 
     return DemoRequestResponse(
         success=True,

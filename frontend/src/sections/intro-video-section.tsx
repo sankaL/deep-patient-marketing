@@ -75,10 +75,14 @@ const IntroVideoSection = ({ demoRequestId }: IntroVideoSectionProps) => {
     if (!video) return;
 
     video.currentTime = 0;
-    void attemptPlayback({
-      preferAudio: true,
-      loadingHint: "Opening the product demo from the top.",
+    const frameId = window.requestAnimationFrame(() => {
+      void attemptPlayback({
+        preferAudio: true,
+        loadingHint: "Opening the product demo from the top.",
+      });
     });
+
+    return () => window.cancelAnimationFrame(frameId);
   }, [demoRequestId]);
 
   useEffect(() => {
@@ -114,11 +118,16 @@ const IntroVideoSection = ({ demoRequestId }: IntroVideoSectionProps) => {
     return () => {
       observer.disconnect();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Intentionally runs once; attemptPlayback uses refs to avoid stale closures
 
+  const mobilePlaybackLabel =
+    playbackLabel === "Playing muted" ? "Muted" : playbackLabel;
+
   return (
-    <section id="demo" className="relative overflow-hidden bg-[hsl(187,21%,10%)] pt-24 pb-20 md:pt-28 md:pb-24 scroll-mt-16">
+    <section
+      id="demo"
+      className="relative overflow-hidden bg-[hsl(187,21%,10%)] pt-24 pb-20 scroll-mt-28 md:pt-28 md:pb-24 md:scroll-mt-32"
+    >
       <div
         className="absolute inset-x-0 top-0 z-0 h-64 bg-gradient-to-b from-[hsl(187,24%,11%)]/10 via-[hsl(187,21%,10%)]/68 to-[hsl(187,21%,10%)] pointer-events-none"
         aria-hidden="true"
@@ -153,23 +162,27 @@ const IntroVideoSection = ({ demoRequestId }: IntroVideoSectionProps) => {
           transition={{ duration: 0.6, delay: 0.1 }}
           className="scroll-mt-24"
         >
-          <div className="rounded-[2rem] border border-white/10 bg-[linear-gradient(145deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))] p-3 shadow-[0_30px_120px_rgba(0,0,0,0.35)] backdrop-blur-xl md:p-4">
+          <div className="rounded-[1.25rem] border border-white/10 bg-[linear-gradient(145deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))] p-1.5 shadow-[0_30px_120px_rgba(0,0,0,0.35)] backdrop-blur-xl sm:rounded-[2rem] sm:p-3 md:p-4">
             <div className="overflow-hidden rounded-[1.5rem] border border-white/10 bg-[#07181a]">
-              <div className="flex items-center justify-between border-b border-white/10 bg-black/20 px-4 py-3 backdrop-blur md:px-6">
-                <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-brand-sage">
+              <div className="flex items-center justify-between gap-3 border-b border-white/10 bg-black/20 px-3 py-2 backdrop-blur sm:px-4 sm:py-3 md:px-6">
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-white sm:hidden">
+                    DeepPatient experience
+                  </p>
+                  <p className="hidden text-[10px] font-semibold uppercase tracking-[0.24em] text-brand-sage sm:block sm:text-[11px]">
                     DeepPatient Overview
                   </p>
-                  <h3 className="mt-2 text-lg font-semibold text-white md:text-2xl">
+                  <h3 className="mt-1 hidden text-sm font-semibold text-white sm:block sm:text-lg md:text-2xl">
                     See what the DeepPatient experience looks like
                   </h3>
                 </div>
-                <div className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/65">
-                  {playbackLabel}
+                <div className="shrink-0 rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[10px] text-white/65 sm:px-3 sm:py-1 sm:text-xs">
+                  <span className="sm:hidden">{mobilePlaybackLabel}</span>
+                  <span className="hidden sm:inline">{playbackLabel}</span>
                 </div>
               </div>
 
-              <div className="bg-[radial-gradient(circle_at_top,rgba(242,176,39,0.2),transparent_42%),linear-gradient(135deg,rgba(7,24,26,0.82),rgba(10,34,37,0.96))] p-4 md:p-6">
+              <div className="bg-[radial-gradient(circle_at_top,rgba(242,176,39,0.2),transparent_42%),linear-gradient(135deg,rgba(7,24,26,0.82),rgba(10,34,37,0.96))] p-2 sm:p-4 md:p-6">
                 <div className="overflow-hidden rounded-[1.25rem] border border-white/10 bg-black shadow-[0_24px_60px_rgba(0,0,0,0.4)]">
                   <video
                     ref={videoRef}
@@ -199,7 +212,7 @@ const IntroVideoSection = ({ demoRequestId }: IntroVideoSectionProps) => {
                   />
                 </div>
 
-                <div className="mt-5 flex flex-col gap-3 text-sm text-white/72 md:flex-row md:items-center md:justify-between">
+                <div className="mt-5 hidden flex-col gap-3 text-sm text-white/72 md:flex md:flex-row md:items-center md:justify-between">
                   <div className="flex items-center gap-2">
                     <Play className="h-4 w-4 text-brand-sage" />
                     <span>Hero CTA scrolls here and restarts playback.</span>

@@ -122,7 +122,10 @@ const PricingSection = ({ onBookDemo }: PricingSectionProps) => {
   };
 
   return (
-    <section id="pricing" className="relative py-24 md:py-32 bg-black scroll-mt-16 overflow-hidden">
+    <section
+      id="pricing"
+      className="relative overflow-hidden bg-black py-24 scroll-mt-28 md:py-32 md:scroll-mt-32"
+    >
       <div className="absolute inset-0 bg-noise opacity-20" />
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[50rem] h-[25rem] bg-brand-sage/6 rounded-full blur-[12rem]" />
 

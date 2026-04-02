@@ -66,6 +66,28 @@ def test_demo_request_notifications_use_sales_and_reply_to(monkeypatch):
     assert "attachments" not in customer_email
 
 
+def test_live_preview_notifications_only_target_sales_inbox(monkeypatch):
+    calls, _ = _install_fake_resend(monkeypatch)
+    service = NotificationService(_settings())
+
+    asyncio.run(
+        service.send_demo_request_notifications(
+            DemoRequest(
+                name="Jane Smith",
+                email="jane@example.com",
+                institution="DeepPatient University",
+                team_size_text="10-50 learners",
+                request_source="live_preview",
+            )
+        )
+    )
+
+    assert len(calls) == 1
+    assert calls[0]["to"] == ["sales@deeppatient.io"]
+    assert "reply_to" not in calls[0]
+    assert "Live preview" in str(calls[0]["html"])
+
+
 def test_pricing_request_notifications_send_internal_and_confirmation(monkeypatch):
     calls, _ = _install_fake_resend(monkeypatch)
     service = NotificationService(_settings())

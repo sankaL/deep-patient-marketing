@@ -108,28 +108,42 @@ class NotificationService:
         email = str(payload.email).strip()
         institution = payload.institution.strip() or "N/A"
         team_size = payload.team_size_text.strip() or "N/A"
+        is_live_preview = payload.request_source == "live_preview"
+        source_label = "Live preview" if is_live_preview else "Book demo"
+        sales_title = (
+            "New live preview lead" if is_live_preview else "New demo request"
+        )
+        sales_intro = (
+            "A visitor shared their details before starting the live preview."
+            if is_live_preview
+            else "A visitor submitted a Book a Demo request on the marketing site."
+        )
 
         sales_message = render_marketing_email(
             self._settings,
             eyebrow="Sales Lead",
-            title="New demo request",
-            intro="A visitor submitted a Book a Demo request on the marketing site.",
+            title=sales_title,
+            intro=sales_intro,
             sections=[
                 EmailSection(label="Name", value=name),
                 EmailSection(label="Email", value=email),
                 EmailSection(label="Institution", value=institution),
                 EmailSection(label="Team size", value=team_size),
-                EmailSection(label="Source", value="Book demo"),
+                EmailSection(label="Source", value=source_label),
             ],
             closing="Send a follow-up from the sales inbox when you're ready.",
         )
 
         self._send(
-            subject=f"New demo request - {name}",
+            subject=f"{sales_title} - {name}",
             to=[self._settings.sales_email],
             html_body=sales_message.html,
             text_body=sales_message.text,
         )
+
+        if is_live_preview:
+            return
+
         customer_message = render_marketing_email(
             self._settings,
             eyebrow="Request received",

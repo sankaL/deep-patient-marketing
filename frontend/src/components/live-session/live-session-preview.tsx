@@ -162,14 +162,24 @@ function PreviewStat({
   value: string;
 }) {
   return (
-    <div className="rounded-2xl border border-brand-forest/8 bg-white/75 px-4 py-3 shadow-[0_15px_30px_-24px_rgba(0,0,0,0.45)] backdrop-blur-sm">
-      <div className="flex items-center gap-2 text-brand-forest/50">
-        <Icon className="h-4 w-4 text-brand-bark" />
-        <span className="text-[10px] font-semibold uppercase tracking-[0.18em]">
-          {label}
-        </span>
+    <div className="rounded-2xl border border-brand-forest/8 bg-white/75 px-3.5 py-2.5 shadow-[0_15px_30px_-24px_rgba(0,0,0,0.45)] backdrop-blur-sm sm:px-4 sm:py-3">
+      <div className="flex items-center gap-2 sm:hidden">
+        <Icon className="h-3.5 w-3.5 shrink-0 text-brand-bark" />
+        <p className="truncate text-[11px] font-semibold leading-none text-brand-forest">
+          {value}
+        </p>
       </div>
-      <p className="mt-3 text-sm font-semibold text-brand-forest">{value}</p>
+      <div className="hidden sm:block">
+        <div className="flex items-center gap-2 text-brand-forest/50">
+          <Icon className="h-4 w-4 text-brand-bark" />
+          <span className="text-[10px] font-semibold uppercase tracking-[0.18em]">
+            {label}
+          </span>
+        </div>
+        <p className="mt-3 text-sm font-semibold text-brand-forest">
+          {value}
+        </p>
+      </div>
     </div>
   );
 }
@@ -235,17 +245,17 @@ export function LiveSessionPreview() {
       initial={{ opacity: 0, y: 60 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 1.2, delay: 0.9, ease: [0.25, 0.4, 0.25, 1] }}
-      className="relative mx-auto mb-12 mt-14 w-full max-w-5xl"
+      className="relative mx-auto mb-10 mt-10 w-full max-w-5xl overflow-hidden sm:mb-12 sm:mt-14"
     >
       <div className="absolute inset-0 rounded-2xl bg-brand-sage/15 blur-[6rem]" />
       <div className="absolute -inset-4 rounded-2xl bg-gradient-to-b from-brand-sage/8 to-transparent blur-3xl" />
 
       <div className="relative overflow-hidden rounded-2xl border border-black/10 bg-brand-cream shadow-[0_25px_60px_-15px_rgba(0,0,0,0.4)]">
-        <div className="flex items-center gap-2 border-b border-black/5 bg-[#f6f6f6] px-4 py-2.5">
-          <div className="h-3 w-3 rounded-full bg-[#FF5F57] shadow-inner" />
-          <div className="h-3 w-3 rounded-full bg-[#FEBC2E] shadow-inner" />
-          <div className="h-3 w-3 rounded-full bg-[#28C840] shadow-inner" />
-          <span className="ml-3 text-[11px] font-medium text-black/40">
+        <div className="flex items-center gap-2 border-b border-black/5 bg-[#f6f6f6] px-3 py-2 sm:px-4 sm:py-2.5">
+          <div className="h-2.5 w-2.5 rounded-full bg-[#FF5F57] shadow-inner sm:h-3 sm:w-3" />
+          <div className="h-2.5 w-2.5 rounded-full bg-[#FEBC2E] shadow-inner sm:h-3 sm:w-3" />
+          <div className="h-2.5 w-2.5 rounded-full bg-[#28C840] shadow-inner sm:h-3 sm:w-3" />
+          <span className="ml-2 text-[10px] font-medium text-black/40 sm:ml-3 sm:text-[11px]">
             {isActive ? "DeepPatient Live Preview" : "DeepPatient Live Session"}
           </span>
         </div>
@@ -272,8 +282,8 @@ export function LiveSessionPreview() {
             />
           </div>
         ) : (
-          <div className="grid min-h-[480px] md:grid-cols-[minmax(0,1.4fr)_240px]">
-            <div className="relative flex flex-col justify-between overflow-hidden p-6 text-left md:p-10">
+          <div className="grid min-h-[330px] md:min-h-[480px] md:grid-cols-[minmax(0,1.4fr)_240px]">
+            <div className="relative flex flex-col justify-between overflow-hidden p-4 text-left md:p-10">
               <div className="absolute inset-0 bg-[#12181b]" />
               <div className="absolute -bottom-20 left-0 h-64 w-64 rounded-full bg-brand-sage/12 blur-3xl" />
               <div className="absolute inset-0 hidden items-center justify-center md:flex">
@@ -287,24 +297,29 @@ export function LiveSessionPreview() {
               <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(8,12,14,0.78)_0%,rgba(8,12,14,0.68)_34%,rgba(8,12,14,0.54)_62%,rgba(8,12,14,0.7)_100%)]" />
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(172,118,76,0.16),rgba(172,118,76,0.08)_24%,rgba(8,12,14,0.22)_52%,rgba(8,12,14,0.36)_100%)]" />
               <div className="relative z-10">
-                <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-brand-bark px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-white shadow-[0_18px_38px_-22px_rgba(0,0,0,0.7)]">
-                  <Video className="h-4 w-4 text-brand-cream" />
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-brand-bark px-3.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-white shadow-[0_18px_38px_-22px_rgba(0,0,0,0.7)] sm:px-4 sm:py-2 sm:text-[11px] sm:tracking-[0.22em]">
+                  <Video className="h-3.5 w-3.5 text-brand-cream sm:h-4 sm:w-4" />
                   DeepPatient Live Preview
                 </div>
 
-                <h3 className="mt-5 max-w-2xl text-3xl font-semibold tracking-tight text-white md:text-4xl">
-                  Start a real AI patient conversation.
+                <h3 className="mt-4 font-semibold tracking-tight text-white sm:mt-5 sm:max-w-2xl sm:text-3xl md:text-4xl">
+                  <span className="text-[0.95rem] leading-none sm:hidden">
+                    Start a real AI patient conversation
+                  </span>
+                  <span className="hidden sm:inline">
+                    Start a real AI patient conversation.
+                  </span>
                 </h3>
 
-                <div className="mt-8 grid gap-3 sm:grid-cols-3">
+                <div className="mt-4 grid gap-2 sm:mt-8 sm:grid-cols-3 sm:gap-3">
                   <PreviewStat icon={Clock3} label="Preview" value="3 minute live session max" />
                   <PreviewStat icon={ShieldCheck} label="Scope" value="Single scenario for quick evaluation" />
                   <PreviewStat icon={Video} label="Access" value="Camera and microphone required" />
                 </div>
               </div>
 
-              <div className="relative z-10 mt-8">
-                <div className="flex flex-col gap-3 sm:flex-row">
+              <div className="relative z-10 mt-3 sm:mt-8 md:text-center">
+                <div className="flex flex-col gap-3 sm:flex-row md:justify-center">
                   <button
                     type="button"
                     onClick={() =>
@@ -335,9 +350,14 @@ export function LiveSessionPreview() {
                   </div>
                 ) : null}
 
-                <p className="mt-4 text-xs leading-6 text-white/72">
-                  By starting the preview you will join a live AI session and be prompted for
-                  microphone and camera access.
+                <p className="mt-3 text-xs leading-5 text-white/72 sm:mt-4 sm:leading-6 md:mx-auto md:max-w-lg">
+                  <span className="sm:hidden">
+                    Preview starts a live session and requests mic/camera access.
+                  </span>
+                  <span className="hidden sm:inline">
+                    By starting the preview you will join a live AI session and be prompted for
+                    microphone and camera access.
+                  </span>
                 </p>
               </div>
             </div>

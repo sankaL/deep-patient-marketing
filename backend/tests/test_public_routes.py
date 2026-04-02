@@ -62,7 +62,7 @@ def test_demo_request_returns_persisted_request_id():
     assert len(fake_notifications.demo_notifications) == 1
 
 
-def test_live_preview_demo_request_skips_notifications():
+def test_live_preview_demo_request_sends_internal_notification_only():
     fake_notifications = FakeNotificationService()
     app.dependency_overrides[get_lead_service] = lambda: FakeLeadService()
     app.dependency_overrides[get_notification_service] = (
@@ -85,7 +85,8 @@ def test_live_preview_demo_request_skips_notifications():
         app.dependency_overrides.clear()
 
     assert response.status_code == 200
-    assert fake_notifications.demo_notifications == []
+    assert len(fake_notifications.demo_notifications) == 1
+    assert fake_notifications.demo_notifications[0].request_source == "live_preview"
 
 
 def test_pricing_inquiry_returns_persisted_request_id():

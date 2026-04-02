@@ -90,9 +90,15 @@ const tableRows = [
   { feature: "Track personal progress over time", admins: false, faculty: false, learners: true },
 ];
 
+const featureTableColumns =
+  "grid-cols-[minmax(0,1.75fr)_repeat(3,minmax(0,0.85fr))] sm:grid-cols-[minmax(0,1.6fr)_repeat(3,minmax(0,0.9fr))]";
+
 const FeaturesSection = () => {
   return (
-    <section id="features" className="relative py-24 md:py-32 bg-[hsl(187,21%,10%)] scroll-mt-16">
+    <section
+      id="features"
+      className="relative bg-[hsl(187,21%,10%)] py-24 scroll-mt-28 md:py-32 md:scroll-mt-32"
+    >
       <div className="absolute top-0 left-0 right-0 h-48 bg-gradient-to-b from-transparent to-[hsl(187,21%,10%)] pointer-events-none z-0" aria-hidden="true" />
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[40rem] h-[20rem] bg-brand-sage/8 rounded-full blur-[8rem]" />
 
@@ -159,24 +165,32 @@ const FeaturesSection = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="max-w-3xl mx-auto"
+          className="mx-auto max-w-4xl"
         >
           <h3 className="text-2xl font-bold text-white text-center mb-8">
             Who Gets What
           </h3>
           <div className="rounded-2xl border border-white/8 bg-white/[0.02] overflow-hidden">
-            <div className="grid grid-cols-4 gap-4 px-6 py-4 border-b border-white/8 bg-white/[0.03]">
-              <div className="text-sm font-semibold text-white/60">Feature</div>
-              <div className="text-center text-sm font-semibold text-white/60">Admins</div>
-              <div className="text-center text-sm font-semibold text-white/60">Faculty</div>
-              <div className="text-center text-sm font-semibold text-white/60">Learners</div>
+            <div className={`grid ${featureTableColumns} gap-3 border-b border-white/8 bg-white/[0.03] px-4 py-4 sm:gap-4 sm:px-6`}>
+              <div className="text-xs font-semibold text-white/60 sm:text-sm">
+                Feature
+              </div>
+              <div className="text-center text-xs font-semibold text-white/60 sm:text-sm">
+                Admins
+              </div>
+              <div className="text-center text-xs font-semibold text-white/60 sm:text-sm">
+                Faculty
+              </div>
+              <div className="text-center text-xs font-semibold text-white/60 sm:text-sm">
+                Learners
+              </div>
             </div>
             {tableRows.map((row, i) => (
               <div
                 key={row.feature}
-                className={`grid grid-cols-4 gap-4 px-6 py-3.5 ${i < tableRows.length - 1 ? "border-b border-white/5" : ""}`}
+                className={`grid ${featureTableColumns} gap-3 px-4 py-3.5 sm:gap-4 sm:px-6 ${i < tableRows.length - 1 ? "border-b border-white/5" : ""}`}
               >
-                <div className="text-sm text-gray-300">{row.feature}</div>
+                <div className="text-sm leading-6 text-gray-300">{row.feature}</div>
                 <div className="flex justify-center">
                   {row.admins && <Check className="h-4 w-4 text-brand-sage" />}
                 </div>
