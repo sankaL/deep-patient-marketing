@@ -28,7 +28,6 @@ const footerLinks = [
 
 const Footer = () => {
   const year = new Date().getFullYear();
-
   const scrollToTop = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -72,9 +71,9 @@ const Footer = () => {
         </div>
 
         {/* Bottom bar */}
-        <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row items-center justify-between gap-6">
           <span className="text-gray-600 text-xs">
-            \u00A9 {year} DeepPatient. All rights reserved.
+            © {year} DeepPatient. All rights reserved.
           </span>
           <div className="flex items-center gap-6">
             <a
