@@ -3,14 +3,17 @@ SCENARIO_PERSONA_CONFIG = {
     "default_replica_id": "r4ba1277e4fb",
     "layers": {
         "llm": {
-            "model": "tavus-gpt-4.1",
+            "model": "tavus-gpt-5.2",
             "speculative_inference": True,
+        },
+        "stt": {
+            "stt_engine": "tavus-parakeet",
         },
         "perception": {
             "perception_model": "raven-1",
         },
         "conversational_flow": {
-            "turn_detection_model": "sparrow-1",
+            "turn_detection_model": "time-based",
             "turn_taking_patience": "medium",
             "replica_interruptibility": "low",
         },
