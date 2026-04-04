@@ -5,7 +5,7 @@ This repo is deployed to Railway as two services:
 - `frontend` for the public site, rooted at `frontend/`
 - `backend` for the FastAPI API, rooted at `backend/`
 
-Both services are intended to auto-deploy from `main` after GitHub merges land.
+This runbook assumes Railway auto-deploy is not currently enabled, so production deploys are triggered manually from the Railway CLI after code is merged to `main`.
 
 ## One-Time Railway Setup
 
@@ -54,14 +54,81 @@ Recommended production cookie settings:
 
 If you attach a custom domain to the frontend service, update `MARKETING_SITE_URL` to that exact public URL.
 
+## Manual Deploy Via Railway CLI
+
+Railway CLI deploys the contents of your local checkout. It does not pull GitHub's `main` for you. Before deploying, make sure your local branch exactly matches `origin/main`.
+
+### One-time local setup
+
+Install and authenticate:
+
+```bash
+brew install railway
+railway login
+```
+
+Link this local repo to the correct Railway project if you have not already:
+
+```bash
+cd /Users/sankal/Documents/professional/deep-patient-marketing/deep-patient-marketing
+railway link
+```
+
+### Standard manual deploy flow
+
+Run this from the repo root every time you want to deploy production:
+
+```bash
+cd /Users/sankal/Documents/professional/deep-patient-marketing/deep-patient-marketing
+git checkout main
+git pull --ff-only origin main
+git status
+railway up -s backend
+railway up -s frontend
+```
+
+`git status` should be clean before you run `railway up`.
+
+### Useful variants
+
+Deploy and exit after build output:
+
+```bash
+railway up -s backend --ci
+railway up -s frontend --ci
+```
+
+Deploy without attaching to logs:
+
+```bash
+railway up -s backend --detach
+railway up -s frontend --detach
+```
+
+If only Railway variables changed and the source code did not, redeploy the existing build:
+
+```bash
+railway redeploy -s backend
+railway redeploy -s frontend
+```
+
+### Check deploy status
+
+```bash
+railway service status -a
+railway service logs -s backend --deployment
+railway service logs -s frontend --deployment
+```
+
 ## Deploy After Merge To `main` Without Supabase Migrations
 
 Use this path when the PR changes only app code, copy, styling, or any backend logic that does not require a schema change in the hosted Supabase project.
 
 1. Merge the PR to `main`.
-2. Railway auto-builds and auto-deploys both `backend` and `frontend`.
-3. Wait for both services to report healthy.
-4. Verify the deploy:
+2. Sync your local checkout to `origin/main`.
+3. Run the manual Railway CLI deploy for `backend`, then `frontend`.
+4. Wait for both services to report healthy.
+5. Verify the deploy:
    - frontend health: `/health`
    - backend health: `/api/health`
    - public site loads normally
@@ -75,7 +142,7 @@ That is the normal day-to-day deploy path.
 
 Use this path when the PR adds or changes SQL files in [`supabase/migrations/`](/Users/sankal/Documents/professional/deep-patient-marketing/deep-patient-marketing/supabase/migrations).
 
-Important: Railway deploys the app containers only. It does not automatically apply Supabase migrations from this repo. Production schema changes are a separate step.
+Important: Railway deploys the app containers only. It does not apply Supabase migrations from this repo. Production schema changes are a separate step.
 
 ### Recommended order
 
@@ -83,8 +150,9 @@ Important: Railway deploys the app containers only. It does not automatically ap
 2. Decide whether the migration is additive/backward-compatible or breaking.
 3. Apply the migration to the hosted Supabase project.
 4. Merge the PR to `main`.
-5. Confirm Railway finishes deploying both services.
-6. Re-check the app flows that depend on the new schema.
+5. Sync your local checkout to `origin/main`.
+6. Deploy `backend` and `frontend` manually through the Railway CLI.
+7. Re-check the app flows that depend on the new schema.
 
 ### If the migration is additive
 
@@ -104,7 +172,7 @@ Examples: renaming a column the new backend now expects, removing an old field, 
 Do not rely on Railway to sort this out after merge. Use one of these approaches:
 
 - apply the production migration before merging to `main`
-- or temporarily disable/pause the `main` auto-deploy until the migration is applied, then re-enable deploys
+- or wait to run the manual Railway deploy until the migration is applied
 
 If the new code reaches Railway before the schema is ready, the backend may fail requests or fail closed.
 
@@ -140,6 +208,22 @@ Use this when you are not using the CLI for production changes.
 
 Only apply the new migrations that are not already present in production.
 
+## Recommended Command Sequence For Schema Changes
+
+When a merged PR includes production migrations, the safest order is:
+
+```bash
+cd /Users/sankal/Documents/professional/deep-patient-marketing/deep-patient-marketing
+git checkout main
+git pull --ff-only origin main
+supabase link --project-ref <your-project-ref>
+supabase db push
+railway up -s backend
+railway up -s frontend
+```
+
+If the migration is breaking, do not deploy the app before the migration is live.
+
 ## If Code Already Merged Before The Migration Ran
 
 If `main` has already deployed and the new code needs schema changes that are not live yet:
@@ -173,3 +257,12 @@ Run this after every production deploy, with or without migrations:
 - backend config: [`backend/railway.json`](/Users/sankal/Documents/professional/deep-patient-marketing/deep-patient-marketing/backend/railway.json)
 - frontend Dockerfile: [`frontend/Dockerfile.railway`](/Users/sankal/Documents/professional/deep-patient-marketing/deep-patient-marketing/frontend/Dockerfile.railway)
 - backend Dockerfile: [`backend/Dockerfile.railway`](/Users/sankal/Documents/professional/deep-patient-marketing/deep-patient-marketing/backend/Dockerfile.railway)
+
+## References
+
+- [Railway CLI](https://docs.railway.com/cli)
+- [Deploying with the CLI](https://docs.railway.com/cli/deploying)
+- [railway up](https://docs.railway.com/cli/up)
+- [railway service](https://docs.railway.com/cli/service)
+- [railway redeploy](https://docs.railway.com/cli/redeploy)
+- [Railway monorepo guide](https://docs.railway.com/guides/monorepo)
