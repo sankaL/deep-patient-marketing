@@ -84,6 +84,17 @@ async def _require_admin_email(
     response: Response,
     auth_service: AdminAuthService = Depends(get_admin_auth_service),
 ) -> str:
+    # 1. Check if the request is proxied with a pre-verified admin email from Better Auth
+    verified_email = request.headers.get("x-admin-email")
+    if verified_email:
+        if auth_service.is_allowed_admin_email(verified_email):
+            return verified_email
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Your account is not authorized for this admin area.",
+        )
+
+    # 2. Fall back to standard session token verification
     access_token = request.cookies.get(auth_service.settings.access_cookie_name)
     refresh_token = request.cookies.get(auth_service.settings.refresh_cookie_name)
 

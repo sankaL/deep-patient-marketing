@@ -1,3 +1,5 @@
+import { authClient } from "@/lib/auth-client";
+
 export interface AdminSession {
   email: string;
 }
@@ -74,45 +76,36 @@ function getErrorMessage(payload: ApiErrorPayload | null, fallback: string): str
 }
 
 export async function fetchAdminSession(): Promise<AdminSession> {
-  const response = await fetch("/api/admin/auth/session", {
-    credentials: "same-origin",
-  });
-  const payload = await readJson<AdminSession>(response);
-  if (!response.ok || !payload || !("email" in payload)) {
-    throw new Error(
-      getErrorMessage(
-        payload as ApiErrorPayload | null,
-        "Please sign in to continue.",
-      ),
-    );
+  const { data } = await authClient.getSession();
+  if (!data || !data.user) {
+    throw new Error("Please sign in to continue.");
   }
-  return payload;
+  return {
+    email: data.user.email,
+  };
 }
 
 export async function loginAdmin(email: string, password: string): Promise<AdminSession> {
-  const response = await fetch("/api/admin/auth/login", {
-    method: "POST",
-    credentials: "same-origin",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password }),
+  const { data, error } = await authClient.signIn.email({
+    email,
+    password,
   });
-  const payload = await readJson<AdminSession>(response);
-  if (!response.ok || !payload || !("email" in payload)) {
-    throw new Error(
-      getErrorMessage(
-        payload as ApiErrorPayload | null,
-        "Admin sign-in failed.",
-      ),
-    );
+  if (error) {
+    throw new Error(error.message || "Admin sign-in failed.");
   }
-  return payload;
+  if (!data || !data.user) {
+    throw new Error("Admin sign-in failed.");
+  }
+  return {
+    email: data.user.email,
+  };
 }
 
 export async function logoutAdmin(): Promise<void> {
-  await fetch("/api/admin/auth/logout", {
-    method: "POST",
-    credentials: "same-origin",
-  });
+  const { error } = await authClient.signOut();
+  if (error) {
+    throw new Error(error.message || "Admin sign-out failed.");
+  }
 }
 
 export async function fetchTavusDashboard(): Promise<TavusDashboardResponse> {

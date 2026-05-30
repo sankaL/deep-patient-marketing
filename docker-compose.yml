@@ -12,16 +12,36 @@ services:
     volumes:
       - ./backend:/app
 
+  hono:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    command: npx tsx watch src/server.ts
+    depends_on:
+      - backend
+    environment:
+      PORT: "3001"
+      BACKEND_UPSTREAM_URL: http://backend:8000
+      ADMIN_EMAILS: ${ADMIN_EMAILS:-evilsanka1008@gmail.com,evilsanka1008+admin@gmail.com,team@deeppatient.io}
+      BETTER_AUTH_URL: http://localhost:5173
+      CHOKIDAR_USEPOLLING: "true"
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./frontend:/app
+      - frontend_node_modules:/app/node_modules
+
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
     command: npm run dev -- --host 0.0.0.0 --port 5173
     depends_on:
-      - backend
+      - hono
     environment:
       CHOKIDAR_USEPOLLING: "true"
       VITE_API_PROXY_TARGET: http://backend:8000
+      VITE_AUTH_PROXY_TARGET: http://hono:3001
       VITE_CONTACT_MODAL_ENABLED: "true"
     ports:
       - "5173:5173"
