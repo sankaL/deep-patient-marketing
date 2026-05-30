@@ -25,7 +25,7 @@ class TavusPreviewStateService:
         result = await self._supabase.rpc(
             "get_tavus_preview_runtime",
             {
-                "p_now": datetime.now(timezone.utc).isoformat(),
+                "p_now": datetime.now(timezone.utc),
                 "p_cap_duration_seconds": preview_max_duration_seconds,
                 "p_encryption_key": api_key_encryption_key,
             },
@@ -86,7 +86,7 @@ class TavusPreviewStateService:
         result = await self._supabase.rpc(
             "close_expired_preview_sessions",
             {
-                "p_now": datetime.now(timezone.utc).isoformat(),
+                "p_now": datetime.now(timezone.utc),
                 "p_cap_duration_seconds": preview_max_duration_seconds,
             },
         )
@@ -104,7 +104,7 @@ class TavusPreviewStateService:
             {
                 "p_preview_session_id": str(preview_session_id),
                 "p_end_reason": end_reason,
-                "p_ended_at": datetime.now(timezone.utc).isoformat(),
+                "p_ended_at": datetime.now(timezone.utc),
                 "p_cap_duration_seconds": preview_max_duration_seconds,
             },
         )
@@ -126,7 +126,7 @@ class TavusPreviewStateService:
         await self._supabase.update_one(
             "tavus_api_keys",
             filters={"id": f"eq.{tavus_api_key_id}"},
-            payload={"low_quota_alert_sent_at": sent_at.isoformat()},
+            payload={"low_quota_alert_sent_at": sent_at},
         )
 
 

@@ -40,7 +40,7 @@ class TavusAdminService:
     async def get_dashboard(
         self, *, preview_max_duration_seconds: int
     ) -> TavusDashboardResponse:
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.now(timezone.utc)
         runtime_row = (
             await self._supabase.rpc(
                 "get_tavus_preview_dashboard_runtime",
@@ -238,7 +238,7 @@ class TavusAdminService:
             {
                 "p_denial_id": str(denial_id),
                 "p_tavus_api_key_id": str(tavus_api_key_id),
-                "p_sent_at": sent_at.isoformat(),
+                "p_sent_at": sent_at,
             },
         )
 
