@@ -9,18 +9,21 @@ COPY . .
 
 RUN npm run build
 
-FROM nginx:1.27-alpine
+FROM node:22-alpine
 
-RUN apk add --no-cache gettext
+WORKDIR /app
 
-WORKDIR /usr/share/nginx/html
+COPY package.json package-lock.json ./
+RUN npm install
 
-COPY --from=build /app/dist ./
-COPY nginx/default.conf.template /opt/nginx/default.conf.template
-COPY scripts/docker-entrypoint.sh /docker-entrypoint.d/99-render-config.sh
+# Copy built static assets and Hono server source code
+COPY --from=build /app/dist ./dist
+COPY --from=build /app/src ./src
+COPY --from=build /app/tsconfig.json ./tsconfig.json
 
-RUN chmod +x /docker-entrypoint.d/99-render-config.sh
+EXPOSE 3001
 
-EXPOSE 8080
+ENV NODE_ENV=production
+ENV PORT=3001
 
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["npx", "tsx", "src/server.ts"]

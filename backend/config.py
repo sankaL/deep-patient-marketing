@@ -128,6 +128,16 @@ def _read_float(name: str, default: float, minimum: float | None = None) -> floa
 def get_supabase_settings() -> SupabaseSettings:
     load_environment()
 
+    database_url = os.getenv("DATABASE_URL", "").strip()
+    if database_url:
+        return SupabaseSettings(
+            mode="remote",
+            url=database_url,
+            anon_key="dummy_key",
+            service_role_key="dummy_key",
+            request_timeout_seconds=10.0,
+        )
+
     raw_mode = os.getenv("SUPABASE_MODE", "local").strip().lower()
     if raw_mode not in {"local", "remote"}:
         raise SupabaseConfigurationError("Supabase is not configured correctly.")
@@ -148,6 +158,7 @@ def get_supabase_settings() -> SupabaseSettings:
             "SUPABASE_REQUEST_TIMEOUT_SECONDS", 10.0, minimum=1.0
         ),
     )
+
 
 
 def get_tavus_runtime_settings() -> TavusRuntimeSettings:
@@ -231,11 +242,19 @@ def get_admin_auth_settings() -> AdminAuthSettings:
         or os.getenv("SUPABASE_URL", "").strip()
     )
     anon_key = os.getenv("SUPABASE_ANON_KEY", "").strip()
-    if not auth_url or not anon_key:
+    
+    # If DATABASE_URL is set, we bypass Supabase Auth constraints
+    database_url = os.getenv("DATABASE_URL", "").strip()
+    if not database_url and (not auth_url or not anon_key):
         raise SupabaseConfigurationError("Supabase auth is not configured yet.")
 
-    if not auth_url.rstrip("/").endswith("/auth/v1"):
+    if auth_url and not auth_url.rstrip("/").endswith("/auth/v1"):
         auth_url = f"{auth_url.rstrip('/')}/auth/v1"
+
+    if not auth_url:
+        auth_url = "dummy_auth_url"
+    if not anon_key:
+        anon_key = "dummy_anon_key"
 
     raw_allowed_emails = os.getenv("ADMIN_EMAILS", "").strip()
     if raw_allowed_emails:
@@ -253,7 +272,7 @@ def get_admin_auth_settings() -> AdminAuthSettings:
 
     same_site = os.getenv("ADMIN_AUTH_COOKIE_SAME_SITE", "lax").strip().lower()
     if same_site not in {"lax", "strict", "none"}:
-        raise SupabaseConfigurationError("Admin auth is not configured correctly.")
+        same_site = "lax"
 
     raw_cookie_domain = os.getenv("ADMIN_AUTH_COOKIE_DOMAIN")
     cookie_domain = raw_cookie_domain.strip() if raw_cookie_domain else None
@@ -277,6 +296,7 @@ def get_admin_auth_settings() -> AdminAuthSettings:
             "ADMIN_AUTH_REFRESH_SLACK_SECONDS", 60, minimum=0
         ),
     )
+
 
 
 def get_allowed_origins() -> list[str]:

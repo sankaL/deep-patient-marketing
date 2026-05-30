@@ -10,7 +10,7 @@
  */
 
 import { betterAuth } from "better-auth";
-import { DatabaseSync } from "node:sqlite";
+import { Pool } from "pg";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -24,7 +24,9 @@ process.env.ADMIN_EMAILS = [process.env.ADMIN_EMAILS || "", email]
   .filter(Boolean)
   .join(",");
 
-const db = new DatabaseSync("auth.sqlite");
+const db = new Pool({
+  connectionString: process.env.DATABASE_URL,
+});
 
 const auth = betterAuth({
   database: db,
@@ -56,4 +58,4 @@ try {
   }
 }
 
-db.close();
+await db.end();

@@ -1,0 +1,9 @@
+node_modules
+dist
+.git
+.vscode
+.idea
+.pytest_cache
+.venv
+.DS_Store
+auth.sqlite

@@ -143,7 +143,7 @@ def _fake_scenario_config() -> ScenarioPersonaConfig:
     )
 
 
-def test_admin_login_sets_session_cookie():
+def test_admin_login_returns_405_method_not_allowed():
     app.dependency_overrides[get_admin_auth_service] = lambda: FakeAdminAuthService()
 
     try:
@@ -155,9 +155,8 @@ def test_admin_login_sets_session_cookie():
     finally:
         app.dependency_overrides.clear()
 
-    assert response.status_code == 200
-    assert response.json()["email"] == "admin@example.com"
-    assert "dp_admin_access_token=" in response.headers["set-cookie"]
+    assert response.status_code == 405
+    assert "Use Better Auth sign-in instead" in response.json()["detail"]
 
 
 def test_admin_session_requires_sign_in():
@@ -175,6 +174,22 @@ def test_admin_session_requires_sign_in():
     assert response.json()["detail"] == "Please sign in to continue."
 
 
+def test_admin_session_succeeds_with_header():
+    app.dependency_overrides[get_admin_auth_service] = lambda: FakeAdminAuthService()
+
+    try:
+        client = create_client()
+        response = client.get(
+            "/api/admin/auth/session",
+            headers={"x-admin-email": "admin@example.com"}
+        )
+    finally:
+        app.dependency_overrides.clear()
+
+    assert response.status_code == 200
+    assert response.json()["email"] == "admin@example.com"
+
+
 def test_admin_dashboard_returns_payload(monkeypatch):
     app.dependency_overrides[get_admin_auth_service] = lambda: FakeAdminAuthService()
     app.dependency_overrides[get_tavus_admin_service] = lambda: FakeTavusAdminService()
@@ -182,8 +197,10 @@ def test_admin_dashboard_returns_payload(monkeypatch):
 
     try:
         client = create_client()
-        client.cookies.set("dp_admin_access_token", "access-token")
-        response = client.get("/api/admin/tavus/dashboard")
+        response = client.get(
+            "/api/admin/tavus/dashboard",
+            headers={"x-admin-email": "admin@example.com"}
+        )
     finally:
         app.dependency_overrides.clear()
 
@@ -201,10 +218,10 @@ def test_admin_rotate_key_uses_fixed_replica(monkeypatch):
 
     try:
         client = create_client()
-        client.cookies.set("dp_admin_access_token", "access-token")
         response = client.post(
             "/api/admin/tavus/rotate",
             json={"api_key": "next-key", "label": "April rotation"},
+            headers={"x-admin-email": "admin@example.com"}
         )
     finally:
         app.dependency_overrides.clear()
@@ -231,10 +248,10 @@ def test_admin_rotate_key_returns_config_error(monkeypatch):
 
     try:
         client = create_client()
-        client.cookies.set("dp_admin_access_token", "access-token")
         response = client.post(
             "/api/admin/tavus/rotate",
             json={"api_key": "next-key", "label": "April rotation"},
+            headers={"x-admin-email": "admin@example.com"}
         )
     finally:
         app.dependency_overrides.clear()

@@ -94,90 +94,25 @@ async def _require_admin_email(
             detail="Your account is not authorized for this admin area.",
         )
 
-    # 2. Fall back to standard session token verification
-    access_token = request.cookies.get(auth_service.settings.access_cookie_name)
-    refresh_token = request.cookies.get(auth_service.settings.refresh_cookie_name)
-
-    async def _refresh_session(token: str) -> str:
-        refreshed = await auth_service.refresh(refresh_token=token)
-        if not auth_service.is_allowed_admin_email(refreshed.email):
-            _clear_admin_session_cookies(response, settings=auth_service.settings)
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Your account is not authorized for this admin area.",
-            )
-        _set_admin_session_cookies(
-            response, settings=auth_service.settings, session=refreshed
-        )
-        return refreshed.email
-
-    if not access_token:
-        if refresh_token:
-            try:
-                return await _refresh_session(refresh_token)
-            except AdminAuthError as exc:
-                _clear_admin_session_cookies(response, settings=auth_service.settings)
-                raise HTTPException(status_code=exc.status_code, detail=str(exc)) from exc
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Please sign in to continue.",
-        )
-
-    try:
-        email = await auth_service.get_user_email(access_token=access_token)
-    except AdminAuthError:
-        if refresh_token:
-            try:
-                return await _refresh_session(refresh_token)
-            except AdminAuthError as exc:
-                _clear_admin_session_cookies(response, settings=auth_service.settings)
-                raise HTTPException(status_code=exc.status_code, detail=str(exc)) from exc
-        _clear_admin_session_cookies(response, settings=auth_service.settings)
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Please sign in to continue.",
-        )
-
-    if not auth_service.is_allowed_admin_email(email):
-        _clear_admin_session_cookies(response, settings=auth_service.settings)
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Your account is not authorized for this admin area.",
-        )
-
-    return email
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Please sign in to continue.",
+    )
 
 
 @router.post("/auth/login", response_model=AdminSessionResponse)
 async def admin_login(
     payload: AdminLoginRequest,
     response: Response,
-    auth_service: AdminAuthService = Depends(get_admin_auth_service),
 ) -> AdminSessionResponse:
-    try:
-        session = await auth_service.login(
-            email=str(payload.email).strip(),
-            password=payload.password,
-        )
-    except AdminAuthError as exc:
-        raise HTTPException(status_code=exc.status_code, detail=str(exc)) from exc
-
-    if not auth_service.is_allowed_admin_email(session.email):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Your account is not authorized for this admin area.",
-        )
-
-    _set_admin_session_cookies(response, settings=auth_service.settings, session=session)
-    return AdminSessionResponse(email=session.email)
+    raise HTTPException(
+        status_code=status.HTTP_405_METHOD_NOT_ALLOWED,
+        detail="Use Better Auth sign-in instead.",
+    )
 
 
 @router.post("/auth/logout", response_model=BasicSuccessResponse)
-async def admin_logout(
-    response: Response,
-    auth_service: AdminAuthService = Depends(get_admin_auth_service),
-) -> BasicSuccessResponse:
-    _clear_admin_session_cookies(response, settings=auth_service.settings)
+async def admin_logout() -> BasicSuccessResponse:
     return BasicSuccessResponse(success=True, message="Signed out.")
 
 
@@ -186,6 +121,7 @@ async def admin_session(
     admin_email: str = Depends(_require_admin_email),
 ) -> AdminSessionResponse:
     return AdminSessionResponse(email=admin_email)
+
 
 
 @router.get("/tavus/dashboard", response_model=TavusDashboardResponse)

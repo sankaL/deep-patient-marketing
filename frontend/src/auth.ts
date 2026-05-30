@@ -1,12 +1,14 @@
 import { betterAuth } from "better-auth";
-import { DatabaseSync } from "node:sqlite";
+import { Pool } from "pg";
 import { createAuthMiddleware, APIError } from "better-auth/api";
 import dotenv from "dotenv";
 
 dotenv.config();
 
-// Use Node.js 22 built-in zero-dependency SQLite database
-const db = new DatabaseSync("auth.sqlite");
+const db = new Pool({
+  connectionString: process.env.DATABASE_URL,
+});
+
 
 const allowedEmails = (process.env.ADMIN_EMAILS || "")
   .split(",")
