@@ -8,10 +8,8 @@ import {
   LoaderCircle,
   ShieldCheck,
   Stethoscope,
-  Thermometer,
   User,
   Video,
-  Wind,
 } from "lucide-react";
 import { motion } from "motion/react";
 
@@ -42,109 +40,100 @@ function HeartRateSparkline() {
 
 function PatientInfoPanel() {
   return (
-    <div className="flex h-full flex-col gap-3 py-1">
-      <div className="flex items-center gap-2 px-1">
-        <div className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-forest/10">
-          <User className="h-3.5 w-3.5 text-brand-forest" />
+    <div className="flex h-full flex-col gap-5 py-3">
+      {/* Patient Header */}
+      <div className="flex items-center gap-3 pb-3.5 border-b border-brand-forest/10 px-1">
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-forest/8">
+          <User className="h-5 w-5 text-brand-forest" />
         </div>
         <div>
-          <p className="text-[11px] font-semibold leading-tight text-brand-forest">
+          <p className="text-base font-bold leading-tight text-brand-forest">
             Darius Miller
           </p>
-          <p className="text-[9px] text-brand-forest/50">Male, 31</p>
+          <p className="text-xs text-brand-forest/60">Male, 31</p>
         </div>
       </div>
 
-      <div className="space-y-2.5 rounded-xl border border-brand-forest/8 bg-white p-3">
-        <div className="flex items-center gap-1.5">
-          <Activity className="h-3 w-3 text-success" />
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-brand-forest/50">
-            Vitals
+      {/* Flat Scenario Details */}
+      <div className="space-y-4 pb-4 border-b border-brand-forest/10 px-1">
+        <div className="flex items-center gap-2">
+          <FileText className="h-4.5 w-4.5 text-brand-sage" />
+          <span className="text-xs font-extrabold uppercase tracking-wider text-brand-forest/65">
+            Scenario Details
           </span>
         </div>
-
-        <div>
-          <div className="mb-1 flex items-center justify-between">
-            <div className="flex items-center gap-1">
-              <Heart className="h-3 w-3 text-red-500" />
-              <span className="text-[10px] text-brand-forest/60">HR</span>
-            </div>
-            <span className="text-xs font-semibold text-brand-forest">
-              78 <span className="text-[9px] font-normal text-brand-forest/50">bpm</span>
-            </span>
-          </div>
-          <HeartRateSparkline />
-        </div>
-
-        <div className="grid grid-cols-2 gap-2">
-          <div className="rounded-lg bg-brand-cream-dark/60 px-2 py-1.5">
-            <div className="mb-0.5 flex items-center gap-1">
-              <Activity className="h-2.5 w-2.5 text-brand-forest/40" />
-              <span className="text-[9px] text-brand-forest/50">BP</span>
-            </div>
-            <span className="text-[11px] font-semibold text-brand-forest">120/80</span>
-          </div>
-          <div className="rounded-lg bg-brand-cream-dark/60 px-2 py-1.5">
-            <div className="mb-0.5 flex items-center gap-1">
-              <Wind className="h-2.5 w-2.5 text-brand-forest/40" />
-              <span className="text-[9px] text-brand-forest/50">SpO₂</span>
-            </div>
-            <span className="text-[11px] font-semibold text-brand-forest">
-              98<span className="text-[9px] font-normal">%</span>
-            </span>
-          </div>
-          <div className="rounded-lg bg-brand-cream-dark/60 px-2 py-1.5">
-            <div className="mb-0.5 flex items-center gap-1">
-              <Thermometer className="h-2.5 w-2.5 text-brand-forest/40" />
-              <span className="text-[9px] text-brand-forest/50">Temp</span>
-            </div>
-            <span className="text-[11px] font-semibold text-brand-forest">
-              98.6<span className="text-[9px] font-normal">°F</span>
-            </span>
-          </div>
-          <div className="rounded-lg bg-brand-cream-dark/60 px-2 py-1.5">
-            <div className="mb-0.5 flex items-center gap-1">
-              <Wind className="h-2.5 w-2.5 text-brand-forest/40" />
-              <span className="text-[9px] text-brand-forest/50">RR</span>
-            </div>
-            <span className="text-[11px] font-semibold text-brand-forest">
-              16<span className="text-[9px] font-normal">/min</span>
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <div className="space-y-2 rounded-xl border border-brand-forest/8 bg-white p-3">
-        <div className="flex items-center gap-1.5">
-          <FileText className="h-3 w-3 text-brand-sage" />
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-brand-forest/50">
-            Scenario
-          </span>
-        </div>
-        <div className="space-y-1.5">
+        <div className="space-y-3.5">
           <div>
-            <p className="text-[9px] font-medium uppercase tracking-wider text-brand-forest/40">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-brand-forest/45">
               Chief Complaint
             </p>
-            <p className="text-[11px] font-medium leading-snug text-brand-forest">
+            <p className="mt-1 text-sm font-bold leading-relaxed text-brand-forest">
               Low mood and loss of interest for 3 months
             </p>
           </div>
           <div className="h-px bg-brand-forest/6" />
           <div>
-            <p className="text-[9px] font-medium uppercase tracking-wider text-brand-forest/40">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-brand-forest/45">
               History
             </p>
-            <p className="text-[10px] leading-snug text-brand-forest/70">
+            <p className="mt-1 text-xs leading-relaxed text-brand-forest/85">
               Recently divorced. Works as senior IT analyst. No prior depressive episodes.
             </p>
           </div>
         </div>
       </div>
 
-      <div className="mt-auto flex items-center gap-1.5 px-1">
-        <Stethoscope className="h-3 w-3 text-brand-sage" />
-        <span className="text-[9px] font-medium text-brand-forest/40">
+      {/* Flat Vitals Section */}
+      <div className="space-y-4 px-1">
+        <div className="flex items-center gap-2">
+          <Activity className="h-4.5 w-4.5 text-success" />
+          <span className="text-xs font-extrabold uppercase tracking-wider text-brand-forest/65">
+            Vitals
+          </span>
+        </div>
+
+        <div>
+          <div className="mb-2 flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <Heart className="h-4 w-4 text-red-500" />
+              <span className="text-[11px] font-semibold text-brand-forest/60">HR</span>
+            </div>
+            <span className="text-sm font-bold text-brand-forest">
+              78 <span className="text-[10px] font-normal text-brand-forest/50">bpm</span>
+            </span>
+          </div>
+          <HeartRateSparkline />
+        </div>
+
+        <div className="grid grid-cols-2 gap-x-6 gap-y-4 pt-1">
+          <div className="flex flex-col pb-2 border-b border-brand-forest/8">
+            <span className="text-[10px] font-bold text-brand-forest/45 uppercase tracking-wider">BP</span>
+            <span className="mt-1 text-sm font-bold text-brand-forest">120/80</span>
+          </div>
+          <div className="flex flex-col pb-2 border-b border-brand-forest/8">
+            <span className="text-[10px] font-bold text-brand-forest/45 uppercase tracking-wider">SpO₂</span>
+            <span className="mt-1 text-sm font-bold text-brand-forest">
+              98<span className="text-[10px] font-normal text-brand-forest/50">%</span>
+            </span>
+          </div>
+          <div className="flex flex-col pb-2">
+            <span className="text-[10px] font-bold text-brand-forest/45 uppercase tracking-wider">Temp</span>
+            <span className="mt-1 text-sm font-bold text-brand-forest">
+              98.6<span className="text-[10px] font-normal text-brand-forest/50">°F</span>
+            </span>
+          </div>
+          <div className="flex flex-col pb-2">
+            <span className="text-[10px] font-bold text-brand-forest/45 uppercase tracking-wider">RR</span>
+            <span className="mt-1 text-sm font-bold text-brand-forest">
+              16<span className="text-[10px] font-normal text-brand-forest/50">/min</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-auto flex items-center gap-2 px-1 py-1 border-t border-brand-forest/10 pt-3.5">
+        <Stethoscope className="h-4 w-4 text-brand-sage" />
+        <span className="text-xs font-semibold text-brand-forest/50">
           OSCE Rubric — Active
         </span>
       </div>
@@ -154,9 +143,9 @@ function PatientInfoPanel() {
 
 function MobilePatientScenarioCard() {
   return (
-    <div className="mt-4 rounded-2xl border border-white/10 bg-white/8 p-4 text-left backdrop-blur-sm md:hidden">
-      <div className="flex items-center gap-2">
-        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-cream/12">
+    <div className="mt-4 border-t border-b border-white/12 py-4 text-left md:hidden">
+      <div className="flex items-center gap-2.5 px-1">
+        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10">
           <User className="h-4 w-4 text-brand-cream" />
         </div>
         <div>
@@ -165,31 +154,31 @@ function MobilePatientScenarioCard() {
         </div>
       </div>
 
-      <div className="mt-4 rounded-xl border border-white/8 bg-black/10 p-3">
-        <div className="flex items-center gap-1.5">
+      <div className="mt-4 space-y-4 px-1">
+        <div className="flex items-center gap-1.5 text-white/70">
           <FileText className="h-3.5 w-3.5 text-brand-cream" />
-          <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/55">
-            Scenario
+          <span className="text-[10px] font-bold uppercase tracking-[0.18em]">
+            Scenario Details
           </span>
         </div>
 
-        <div className="mt-3 space-y-3">
+        <div className="space-y-3">
           <div>
-            <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-white/45">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/45">
               Chief Complaint
             </p>
-            <p className="mt-1 text-sm font-medium leading-snug text-white">
+            <p className="mt-1 text-sm font-semibold leading-snug text-white">
               Low mood and loss of interest for 3 months
             </p>
           </div>
 
-          <div className="h-px bg-white/8" />
+          <div className="h-px bg-white/10" />
 
           <div>
-            <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-white/45">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/45">
               History
             </p>
-            <p className="mt-1 text-sm leading-snug text-white/72">
+            <p className="mt-1 text-xs leading-relaxed text-white/75">
               Recently divorced. Works as senior IT analyst. No prior depressive episodes.
             </p>
           </div>
@@ -209,24 +198,16 @@ function PreviewStat({
   value: string;
 }) {
   return (
-    <div className="rounded-2xl border border-brand-forest/8 bg-white/75 px-3.5 py-2.5 shadow-[0_15px_30px_-24px_rgba(0,0,0,0.45)] backdrop-blur-sm sm:px-4 sm:py-3">
-      <div className="flex items-center gap-2 sm:hidden">
-        <Icon className="h-3.5 w-3.5 shrink-0 text-brand-bark" />
-        <p className="truncate text-[11px] font-semibold leading-none text-brand-forest">
-          {value}
-        </p>
+    <div className="flex flex-col gap-1.5 border-l border-white/12 pl-3">
+      <div className="flex items-center gap-1.5 text-white/60">
+        <Icon className="h-3.5 w-3.5 text-brand-cream/85 shrink-0" />
+        <span className="text-[9px] font-semibold uppercase tracking-[0.18em]">
+          {label}
+        </span>
       </div>
-      <div className="hidden sm:block">
-        <div className="flex items-center gap-2 text-brand-forest/50">
-          <Icon className="h-4 w-4 text-brand-bark" />
-          <span className="text-[10px] font-semibold uppercase tracking-[0.18em]">
-            {label}
-          </span>
-        </div>
-        <p className="mt-3 text-sm font-semibold text-brand-forest">
-          {value}
-        </p>
-      </div>
+      <p className="text-[11px] font-medium leading-relaxed text-white/90">
+        {value}
+      </p>
     </div>
   );
 }
@@ -292,7 +273,7 @@ export function LiveSessionPreview() {
       initial={{ opacity: 0, y: 60 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 1.2, delay: 0.9, ease: [0.25, 0.4, 0.25, 1] }}
-      className="relative mx-auto mb-10 mt-10 w-full max-w-5xl overflow-hidden sm:mb-12 sm:mt-14"
+      className="relative mx-auto mb-10 mt-10 w-full max-w-6xl overflow-hidden sm:mb-12 sm:mt-14"
     >
       <div className="absolute inset-0 rounded-2xl bg-brand-sage/15 blur-[6rem]" />
       <div className="absolute -inset-4 rounded-2xl bg-gradient-to-b from-brand-sage/8 to-transparent blur-3xl" />
@@ -329,7 +310,7 @@ export function LiveSessionPreview() {
             />
           </div>
         ) : (
-          <div className="grid min-h-[330px] md:min-h-[480px] md:grid-cols-[minmax(0,1.4fr)_240px]">
+          <div className="grid min-h-[330px] md:min-h-[480px] md:grid-cols-[minmax(0,1fr)_400px]">
             <div className="relative flex flex-col justify-between overflow-hidden p-4 text-left md:p-10">
               <div className="absolute inset-0 bg-[#12181b]" />
               <div className="absolute -bottom-20 left-0 h-64 w-64 rounded-full bg-brand-sage/12 blur-3xl" />
@@ -422,7 +403,7 @@ export function LiveSessionPreview() {
               </div>
             </div>
 
-            <div className="hidden overflow-y-auto border-l border-black/5 bg-brand-cream-dark/50 p-3 text-left md:flex md:flex-col">
+            <div className="hidden overflow-y-auto border-l border-black/5 bg-brand-cream-dark/50 p-5 text-left md:flex md:flex-col">
               <PatientInfoPanel />
             </div>
           </div>
