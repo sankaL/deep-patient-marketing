@@ -1,87 +1,98 @@
-# DeepPatient Marketing
+<p align="center">
+  <img src="frontend/public/brand/deeppatient-logo-black.svg" alt="DeepPatient logo" width="180" />
+</p>
 
-## Production deployment
+<h1 align="center">DeepPatient Marketing Platform</h1>
 
-The repository now includes a dedicated production deployment path for:
+<p align="center">
+  <strong>The commercial landing page and interactive product preview portal for DeepPatient.</strong>
+</p>
 
-- `backend/Dockerfile.railway` for the FastAPI API on Railway
-- `frontend/Dockerfile.railway` for a built React app served by nginx on Railway
-- `backend/railway.json` for backend Railway build and deploy settings
-- `frontend/railway.json` for frontend Railway build and deploy settings
-- `frontend/nginx/default.conf.template` to proxy `/api` to a private backend service so the public site and admin cookies stay same-origin
+<p align="center">
+  <a href="https://www.deeppatient.io"><img src="https://img.shields.io/badge/Website-deeppatient.io-blue?style=flat-square" alt="Website" /></a>
+  <img src="https://img.shields.io/badge/License-Proprietary-red?style=flat-square" alt="License" />
+  <img src="https://img.shields.io/badge/Stack-React%20%7C%20FastAPI%20%7C%20Supabase-success?style=flat-square" alt="Stack" />
+</p>
 
-Recommended production topology:
+---
 
-- public Railway service: `frontend`
-- private Railway service: `backend`
-- hosted Supabase project with the existing migrations in `supabase/migrations/`
+## Product Value Proposition
 
-For Railway config-as-code, point each service at its committed custom config file:
+DeepPatient provides safe, repeatable, and interactive patient encounters for clinical training. This repository contains the commercial platform, built to demonstrate core product capabilities, drive lead generation, and capture partner interest:
 
-- backend service config path: `/backend/railway.json`
-- frontend service config path: `/frontend/railway.json`
+* **Interactive Patient Preview:** Visitors engage in a live, 3-minute video conversation with an AI patient avatar.
+* **On-Demand Demos:** Immediate product walk-throughs showcasing rubric-based scoring.
+* **Secure Governance:** Fully managed admin portal for access keys, scenarios, and lead logging.
 
-For the full Railway setup and main-branch auto-deploy checklist, see `docs/railway-deployment.md`.
+---
 
-Key production variables:
+## Key Modules
 
-- backend: `SUPABASE_MODE=remote`, `SUPABASE_URL`, `SUPABASE_AUTH_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`, `FROM_EMAIL`, `SALES_EMAIL`, `PRODUCT_VIDEO_URL`, `TAVUS_API_KEY_ENCRYPTION_KEY`, `ADMIN_EMAIL`, `ADMIN_EMAILS`, `MARKETING_SITE_URL`
-- frontend: `BACKEND_UPSTREAM_URL` pointing at the backend Railway private URL, typically `http://${{backend.RAILWAY_PRIVATE_DOMAIN}}:8000`
+### Frontend (React & Vite)
+A responsive landing page showcasing the DeepPatient value proposition. It features:
+* **Conversational Video Sandbox:** Direct WebRTC connection to a live AI patient replica.
+* **Admin Dashboard:** Access-controlled interface to rotate Tavus keys, update configurations, and audit leads.
 
-The frontend keeps relative `/api` calls in production; nginx proxies them to the private backend service.
-Set `MARKETING_SITE_URL` to the public frontend URL users actually hit. If you attach a custom domain such as `deeppatient.io`, its DNS must point at the Railway `frontend` service or production tests and email links will hit a different site.
+### Backend (FastAPI)
+An asynchronous API service handling system integrations:
+* **Tavus Integration:** Session token generation, scenario validation, and webhook processing.
+* **Lead Capture & Alerts:** Automated notifications via Resend API and logging.
+* **Admin Auth:** Supabase Auth-backed portal operations.
 
-## Local Docker workflow
+---
 
-This repository now includes a containerized development stack for the frontend, backend, and an optional local Supabase-compatible data stack.
+## Local Development
 
-## Requirements
+### Requirements
+* Docker Desktop with `docker compose`
+* GNU Make
+* A configured `backend/.env` file (copied from `backend/.env.example`)
 
-- Docker Desktop with the `docker compose` plugin
-- GNU Make
-- A populated `backend/.env` file
-
-Create the backend env file before starting the stack:
-
-```bash
-cp backend/.env.example backend/.env
-```
-
-For local development, the committed example points the backend at the local Supabase gateway on `http://localhost:55431` and seeds one active Tavus key/scenario from the bootstrap variables.
-The backend now also expects Supabase Auth settings for the hidden admin portal. Configure `SUPABASE_AUTH_URL`, `SUPABASE_ANON_KEY`, and `ADMIN_EMAILS` in `backend/.env` before using `/admin`.
-
-## Start The Stack
-
+### Start the Stack
+Initialize local containers:
 ```bash
 make dev
 ```
+This runs the Vite frontend (port 5173), FastAPI backend (port 8000), and a local Supabase instance (port 55431) for testing auth and database queries locally.
 
-This starts:
-
-- the Vite frontend on `http://localhost:5173`
-- the FastAPI backend on `http://localhost:8000`
-- the local Supabase gateway for both REST and Auth on `http://localhost:55431` when `SUPABASE_MODE=local`
-- the local Postgres database on `localhost:55432` when `SUPABASE_MODE=local`
-
-The frontend proxies `/api` requests to the backend container, so browser requests stay same-origin during development.
-The hidden admin portal is available by direct URL at `http://localhost:5173/admin`.
-
-When `SUPABASE_MODE=remote`, `make dev` starts only the frontend and backend containers and expects `SUPABASE_URL` plus `SUPABASE_SERVICE_ROLE_KEY` to target a hosted Supabase project.
-
-## Other Commands
-
+### Utilities
 ```bash
-make build
-make dev-local
-make logs
-make ps
-make down
+make build       # Rebuild containers
+make logs        # View runtime logs
+make down        # Stop the local stack
 ```
 
-## Notes
+---
 
-- Frontend source changes reload through Vite HMR.
-- Backend source changes reload through Uvicorn.
-- Local schema migrations and Tavus bootstrap seeding run through the `supabase-bootstrap` one-shot container before the backend starts.
-- Resend can remain unset for local work; public form submission still persists, and notification delivery is skipped.
-- Sales notifications for exhausted Tavus capacity are controlled through `SALES_EMAIL`.
+## Production Deployment
+
+This repository is optimized for deployment on Railway:
+* **Frontend Service:** React application built and served via Nginx. Nginx proxies all `/api` calls to the backend service.
+* **Backend Service:** FastAPI server communicating with the database.
+* **Data Layer:** Remote hosted Supabase instance.
+
+For the step-by-step setup checklist, refer to the [Railway Deployment Guide](docs/railway-deployment.md).
+
+---
+
+## Technology Stack
+
+### Frontend
+* React 19
+* Vite
+* Tailwind CSS v4
+* Motion (Framer Motion v12)
+* Hono (Edge/Node middleware server)
+* Better Auth
+* Kysely & Jotai
+
+### Backend
+* FastAPI & Uvicorn
+* Resend API Python SDK
+* AsyncPG & Pydantic
+* HTTPX
+
+### Infrastructure
+* Supabase (PostgreSQL, Auth, Migrations)
+* Tavus Conversational Video AI
+* Railway Cloud Hosting
