@@ -1,0 +1,36 @@
+# DeepPatient
+
+> AI-Powered Clinical Skills Training Platform
+
+DeepPatient provides safe, repeatable, and interactive AI patient encounters with instant rubric-based feedback for medical schools, nursing programs, and healthcare training institutions.
+
+## Key Capabilities
+
+- **Live AI Patient Simulation**: Interactive, unscripted conversational encounters with lifelike AI patients over live video. Patients dynamically respond to history-taking, questions, and clinical demeanor in real time.
+- **Rubric-Based Objective Feedback**: Immediate post-session evaluation against institutional rubrics with plain-language diagnostic and communication breakdown. Exportable as comprehensive PDF reports.
+- **Scenario Control & Customization**: Faculty and administrators can author custom patient cases, define clinical context, modulate patient behaviors/affect, and attach existing assessment frameworks without coding.
+- **Faculty & Cohort Management**: Assign clinical cases to cohorts, track completion metrics, and identify systemic communication or diagnostic gaps across student groups.
+- **Learner Dashboard**: Students track longitudinal skill development, review session transcripts, replay encounters, and monitor improvement over time.
+- **Security & FERPA Alignment**: Role-based access control (RBAC), data encryption in transit and at rest, and FERPA-aligned data handling policies.
+
+## User Personas & Permissions
+
+- **Administrators**: Create and edit scenarios, define institutional rubrics, manage user permissions, and oversee platform configurations.
+- **Faculty & Educators**: Assign scenarios to cohorts, view aggregate cohort performance, drill into individual student sessions, and review rubric scoring.
+- **Learners (Medical & Nursing Students, Residents)**: Conduct live patient simulations, review instant feedback & transcripts, track personal progress over time.
+
+## Evaluation & Assessment Framework
+
+DeepPatient supports standard and custom clinical rubrics including:
+- History-taking completeness and clinical reasoning
+- Bedside manner, empathy, and active listening
+- Diagnostic hypothesis formulation and follow-up planning
+- OSCE (Objective Structured Clinical Examination) readiness
+
+## Getting Started & Pilot Programs
+
+- **Pilot Programs**: Structured pilots are available for qualifying medical schools, nursing colleges, and residency programs.
+- **Onboarding Timeline**: Typical institutional rollout in 2 to 4 weeks, including custom rubric translation and scenario library preparation.
+- **Website**: https://deeppatient.io
+- **Book a Demo**: https://deeppatient.io#pricing
+- **Full LLM Documentation**: https://deeppatient.io/llms-full.txt

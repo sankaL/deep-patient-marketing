@@ -1,0 +1,91 @@
+# DeepPatient — Full System Documentation
+
+DeepPatient is an AI-powered clinical skills training platform designed to provide safe, repeatable, and interactive clinical encounters with instant, rubric-based feedback.
+
+Website: https://deeppatient.io
+Contact: hello@deeppatient.io
+Target Audience: Medical schools, nursing colleges, physician assistant (PA) programs, residency training programs, healthcare simulation centers.
+
+---
+
+## 1. Product Overview
+
+Traditional standardized patient (SP) programs are expensive, logistically complex, and difficult to scale across large cohorts. DeepPatient bridges this gap by providing AI-simulated patient encounters that medical learners can access on demand.
+
+Learners interact with lifelike AI patients via live video and voice. The patient responds dynamically to open-ended clinical questions, revealing relevant medical history, symptoms, emotional cues, and behavioral traits based on the learner's approach.
+
+---
+
+## 2. Core Features & Architecture
+
+### 2.1 Live AI Patient Simulation
+- **Conversational Realism**: Unscripted, responsive patient avatars that react to tone, clinical questioning style, and follow-up prompts.
+- **Multimodal Interaction**: Real-time video and audio stream with realistic facial expressions and responsive vocal inflection.
+- **Dynamic Emotional States**: Patients display anxiety, hesitancy, confusion, or guardedness until the learner establishes rapport and empathy.
+
+### 2.2 Objective Rubric-Based Evaluation
+- **Instant Scoring**: Immediately upon encounter completion, the session transcript is evaluated against the institution's rubric.
+- **Detailed Categorization**: Scoring evaluates history taking (HPI, past medical, family, social history, review of systems), bedside manner, empathy, shared decision-making, and communication clarity.
+- **Actionable Explanations**: Plain-language feedback explaining why specific points were earned or missed, complete with quote citations from the transcript.
+- **Exportable PDF Reports**: Detailed learner summaries and transcripts exportable for faculty grading and learner portfolios.
+
+### 2.3 Scenario Authoring & Customization
+- **No-Code Scenario Studio**: Faculty and simulation directors can craft custom cases in minutes.
+- **Clinical Parameter Control**: Set patient demographics, primary complaints, hidden clinical details, physical symptoms, lab values, and behavioral temperament.
+- **Rubric Mapping**: Bind custom institutional assessment frameworks directly to scenario objectives.
+
+### 2.4 Faculty & Cohort Management
+- **Cohort Assignment**: Distribute individual cases or multi-case modules to entire classes or specific training cohorts.
+- **Cohort Analytics**: Aggregated dashboards showing class-wide score distributions, common diagnostic oversights, and communication weak points.
+- **Individual Review**: Drill down into any student encounter with full transcripts, timestamps, and evaluator notes.
+
+### 2.5 Learner Progress & Personal Dashboard
+- **Longitudinal Skill Tracking**: Track improvement over time across key clinical competencies.
+- **Transcripts & Replay**: Revisit past cases to analyze clinical missteps and prepare for OSCE examinations.
+- **Self-Directed Practice**: Access elective practice scenarios to build confidence before clinical rotations.
+
+### 2.6 Security, Privacy, and FERPA Alignment
+- **FERPA Compliance**: Architecture built with student data privacy at the core.
+- **Encryption**: Industry-standard TLS encryption in transit and AES-256 encryption at rest.
+- **Role-Based Access Control (RBAC)**: Strict permission boundaries separating Admins, Faculty, and Learners.
+
+---
+
+## 3. Role Matrix
+
+| Feature | Administrators | Faculty | Learners |
+| :--- | :---: | :---: | :---: |
+| Create & edit scenarios | Yes | Custom / View | No |
+| Define evaluation rubrics | Yes | Review | No |
+| Manage user accounts & permissions | Yes | Cohort only | No |
+| Assign scenarios to cohorts | Yes | Yes | No |
+| View aggregated class analytics | Yes | Yes | No |
+| Run live AI patient simulations | Test mode | Test mode | Yes |
+| Receive rubric-based feedback | Yes | Yes | Yes |
+| Access session transcripts & reports | Yes | Yes | Personal only |
+| Track personal progress over time | No | No | Yes |
+
+---
+
+## 4. Frequently Asked Questions
+
+### Is there a free trial or pilot option?
+Yes. DeepPatient offers structured pilot programs for qualifying healthcare training institutions. Pilots allow faculty to test custom scenarios with a select student cohort and evaluate rubric alignment before full rollout.
+
+### How long does institutional onboarding take?
+Most institutions are fully operational within 2 to 4 weeks. DeepPatient assists with scenario configuration, rubric digitization, LMS alignment, and training for faculty and administrative staff.
+
+### Can we use our own evaluation rubrics?
+Yes. DeepPatient allows institutions to retain complete ownership and control over their assessment frameworks. Existing OSCE rubrics, communication scales (e.g., Calgary-Cambridge Guide), and diagnostic checklists can be directly implemented.
+
+### Is DeepPatient compatible with existing Learning Management Systems (LMS)?
+DeepPatient supports LMS integrations (Canvas, Blackboard, Moodle) on a case-by-case basis through standard LTI and API workflows.
+
+---
+
+## 5. Contact & Institutional Demos
+
+To schedule a live demonstration or request institutional pilot pricing:
+- Website: https://deeppatient.io
+- Demo Booking: https://deeppatient.io#pricing
+- Institutional Inquiries: hello@deeppatient.io
