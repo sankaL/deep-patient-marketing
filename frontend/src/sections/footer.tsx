@@ -2,14 +2,6 @@ import logoWhite from "@/assets/brand/deeppatient-logo-white.svg";
 
 const footerLinks = [
   {
-    heading: "Product",
-    links: [
-      { label: "Features", href: "#features" },
-      { label: "Pricing", href: "#pricing" },
-      { label: "Demo", href: "#demo" },
-    ],
-  },
-  {
     heading: "Company",
     links: [
       { label: "About", href: "#top" },
@@ -17,80 +9,60 @@ const footerLinks = [
     ],
   },
   {
-    heading: "Legal",
+    heading: "Product",
     links: [
-      { label: "Privacy", href: "#top" },
-      { label: "Terms", href: "#top" },
-      { label: "Security", href: "#top" },
+      { label: "Features", href: "#features" },
+      { label: "Pricing", href: "#pricing" },
+      { label: "Demo", href: "#demo" },
     ],
   },
 ];
 
 const Footer = () => {
   const year = new Date().getFullYear();
-  const scrollToTop = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
   return (
     <footer className="bg-black border-t border-white/5 py-12">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
+        <div className="mb-12 flex flex-col gap-10 md:flex-row md:items-start md:justify-between">
           {/* Brand */}
-          <div className="col-span-2 md:col-span-1">
+          <div className="max-w-sm">
             <div className="flex items-center gap-3 mb-4">
               <img src={logoWhite} alt="DeepPatient" className="h-7 w-7" />
               <span className="text-lg font-bold text-white">DeepPatient</span>
             </div>
             <p className="text-gray-500 text-sm leading-relaxed">
-              AI-powered clinical skills training for medical institutions.
+              AI patient practice and feedback for clinical training programs.
             </p>
           </div>
 
-          {/* Link columns */}
-          {footerLinks.map((col) => (
-            <div key={col.heading}>
-              <h4 className="text-sm font-semibold text-white mb-4">
-                {col.heading}
-              </h4>
-              <ul className="space-y-2.5">
-                {col.links.map((link) => (
-                  <li key={link.label}>
-                    <a
-                      href={link.href}
-                      className="text-sm text-gray-500 hover:text-gray-300 transition-colors"
-                    >
-                      {link.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+          <div className="grid grid-cols-2 gap-12 md:gap-16">
+            {footerLinks.map((col) => (
+              <div key={col.heading} className="min-w-24">
+                <h4 className="text-sm font-semibold text-white mb-4">
+                  {col.heading}
+                </h4>
+                <ul className="space-y-2.5">
+                  {col.links.map((link) => (
+                    <li key={link.label}>
+                      <a
+                        href={link.href}
+                        className="text-sm text-gray-500 hover:text-gray-300 transition-colors"
+                      >
+                        {link.label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Bottom bar */}
-        <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="border-t border-white/5 pt-8 flex items-center justify-center">
           <span className="text-gray-600 text-xs">
             © {year} DeepPatient. All rights reserved.
           </span>
-          <div className="flex items-center gap-6">
-            <a
-              href="#top"
-              onClick={scrollToTop}
-              className="text-gray-600 text-xs hover:text-gray-400 transition-colors"
-            >
-              Privacy Policy
-            </a>
-            <a
-              href="#top"
-              onClick={scrollToTop}
-              className="text-gray-600 text-xs hover:text-gray-400 transition-colors"
-            >
-              Terms of Service
-            </a>
-          </div>
         </div>
       </div>
     </footer>

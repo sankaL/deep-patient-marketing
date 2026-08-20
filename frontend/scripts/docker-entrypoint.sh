@@ -27,3 +27,5 @@ export NGINX_LOCAL_RESOLVERS
 envsubst '${BACKEND_UPSTREAM_URL} ${NGINX_LOCAL_RESOLVERS}' \
   < /opt/nginx/default.conf.template \
   > /etc/nginx/conf.d/default.conf
+
+exec "$@"

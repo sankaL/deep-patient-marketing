@@ -1,6 +1,4 @@
-import type { ContactFormData } from "@/components/live-session/contact-modal";
-
-export type DemoRequestSource = "book_demo" | "live_preview";
+import type { ContactFormData } from "@/components/contact-modal";
 
 interface DemoRequestResponse {
   request_id: string;
@@ -8,7 +6,6 @@ interface DemoRequestResponse {
 
 export async function submitDemoRequest(
   payload: ContactFormData,
-  requestSource: DemoRequestSource,
 ): Promise<string> {
   const response = await fetch("/api/demo-request", {
     method: "POST",
@@ -18,7 +15,6 @@ export async function submitDemoRequest(
       email: payload.email,
       institution: payload.institution ?? "",
       team_size_text: payload.teamSize ?? "",
-      request_source: requestSource,
     }),
   });
 

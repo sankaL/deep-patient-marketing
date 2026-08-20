@@ -23,19 +23,19 @@ const steps = [
     number: "1",
     title: "Tell us about your program.",
     description:
-      "Fill out the form below with your organization size and a bit of context. The more we know, the faster we can get you a relevant proposal.",
+      "Share your program size and what you need. We’ll use that to prepare a relevant proposal.",
   },
   {
     number: "2",
     title: "We\u2019ll reach out within one business day.",
     description:
-      "A member of our team will follow up to learn more, answer your questions, and put together a tailored quote.",
+      "A member of our team will follow up, answer your questions, and prepare a quote.",
   },
   {
     number: "3",
     title: "Get started.",
     description:
-      "Once scoped, onboarding is fast. We\u2019ll work with your admin team to configure your scenario library and get your first cohort running.",
+      "We’ll help your admin team set up the scenario library and prepare the first cohort.",
   },
 ];
 
@@ -52,19 +52,19 @@ const orgSizes = [
 const faqs = [
   {
     q: "Is there a free trial or pilot option?",
-    a: "We offer structured pilot programs for qualifying institutions. Reach out and let us know you\u2019re interested in a pilot \u2014 we\u2019re happy to discuss what that looks like for your program.",
+    a: "We offer pilot programs for qualifying institutions. Tell us you’re interested in a pilot and we’ll discuss what would make sense for your program.",
   },
   {
     q: "How long does onboarding take?",
-    a: "Most institutions are up and running within two to four weeks. Our team handles scenario configuration, user onboarding, and initial training for admins and faculty.",
+    a: "Most institutions are ready within two to four weeks. We help configure scenarios, onboard users, and train admins and faculty.",
   },
   {
     q: "Can we use our own evaluation rubrics?",
-    a: "Yes. Rubric design is entirely yours. Our team can help translate your existing clinical assessment frameworks into the DeepPatient format.",
+    a: "Yes. You keep control of the rubric. We can help adapt your existing assessment framework to DeepPatient.",
   },
   {
     q: "Is DeepPatient compatible with our existing LMS?",
-    a: "We support integration discussions on a case-by-case basis. Reach out and we\u2019ll let you know what\u2019s possible.",
+    a: "LMS support depends on the system and your requirements. Tell us what you use and we’ll confirm what is possible.",
   },
 ];
 
@@ -142,12 +142,11 @@ const PricingSection = ({ onBookDemo }: PricingSectionProps) => {
             Pricing
           </span>
           <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
-            Pricing That Scales{" "}
-            <span className="text-white/50">With Your Program.</span>
+            Pricing built around your program.
           </h2>
           <p className="text-gray-400 text-lg leading-relaxed">
-            DeepPatient is priced based on your institution{"\u2019"}s size and needs not on
-            arbitrary tiers. Tell us about your program and we{"\u2019"}ll build a proposal around it.
+            Pricing depends on the size of your institution and how you plan to
+            use DeepPatient. Tell us what you need and we’ll prepare a proposal.
           </p>
         </motion.div>
 
@@ -165,11 +164,11 @@ const PricingSection = ({ onBookDemo }: PricingSectionProps) => {
                 <Sparkles className="h-5 w-5 text-brand-sage" />
               </div>
               <h3 className="text-xl font-semibold text-white">
-                What{"\u2019"}s Always Included
+                Included in Every Plan
               </h3>
             </div>
             <p className="text-gray-400 text-sm mb-6">
-              Every DeepPatient plan includes the full platform {"\u2014"} no feature gating, no upsells:
+              Every plan includes the full platform. We do not lock core tools behind higher tiers.
             </p>
             <ul className="space-y-3">
               {included.map((item) => (
@@ -223,10 +222,10 @@ const PricingSection = ({ onBookDemo }: PricingSectionProps) => {
         >
           <div className="rounded-2xl border border-white/10 bg-white/[0.04] backdrop-blur-sm p-8 md:p-10">
             <h3 className="text-2xl font-bold text-white mb-2 text-center">
-              Get a Custom Proposal
+              Request a Proposal
             </h3>
             <p className="text-gray-400 text-sm text-center mb-8">
-              Tell us about your program and we{"\u2019"}ll put together a tailored quote.
+              Tell us what your program needs and we’ll prepare a quote.
             </p>
 
             {status === "success" ? (

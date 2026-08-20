@@ -22,11 +22,11 @@ const FooterCtaSection = ({ onBookDemo }: FooterCtaSectionProps) => {
         className="relative container mx-auto px-4 text-center"
       >
         <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white max-w-4xl mx-auto leading-tight mb-6">
-          Ready to transform how your institution{" "}
-          <span className="text-brand-sage">trains clinicians?</span>
+          Give learners more time with patients,
+          <span className="text-brand-sage"> without adding more schedules.</span>
         </h2>
         <p className="text-gray-400 text-lg max-w-2xl mx-auto mb-10">
-          All at a fraction of the cost of live standardized patients.
+          See how DeepPatient could fit into your clinical training program.
         </p>
         <button
           type="button"

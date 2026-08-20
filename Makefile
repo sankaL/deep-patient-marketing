@@ -1,11 +1,7 @@
 .PHONY: build check-env dev dev-local down frontend-build logs ps stop
 
-SUPABASE_MODE_RAW := $(shell awk -F= '/^SUPABASE_MODE=/{print $$2}' backend/.env 2>/dev/null | tail -n1 | tr -d '\r')
-SUPABASE_MODE := $(if $(SUPABASE_MODE_RAW),$(SUPABASE_MODE_RAW),local)
-COMPOSE_BASE := docker compose -f docker-compose.yml
-COMPOSE_LOCAL := docker compose -f docker-compose.yml -f supabase/docker-compose.yml
-COMPOSE := $(if $(filter local,$(SUPABASE_MODE)),$(COMPOSE_LOCAL),$(COMPOSE_BASE))
-LOCAL_SUPABASE_SERVICES := supabase-db supabase-rest supabase-auth supabase-gateway supabase-bootstrap
+COMPOSE := docker compose -f docker-compose.yml -f supabase/docker-compose.yml
+LOCAL_SUPABASE_SERVICES := supabase-db supabase-rest supabase-gateway supabase-bootstrap
 
 build:
 	$(COMPOSE) build
@@ -23,9 +19,7 @@ dev: check-env frontend-build stop
 
 # Local development without Docker
 dev-local: check-env
-	@if [ "$(SUPABASE_MODE)" = "local" ]; then \
-		$(COMPOSE_LOCAL) up -d $(LOCAL_SUPABASE_SERVICES); \
-	fi
+	@$(COMPOSE) up -d $(LOCAL_SUPABASE_SERVICES)
 	@echo "Starting backend on port 8000..."
 	@cd backend && python3 -m uvicorn main:app --reload --host 0.0.0.0 --port 8000 &
 	@echo "Starting frontend on port 5173..."

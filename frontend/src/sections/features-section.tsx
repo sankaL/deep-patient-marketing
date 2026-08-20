@@ -14,9 +14,9 @@ const features = [
     number: "01",
     icon: Video,
     title: "Live AI Patient Simulation",
-    tagline: "The encounter that feels real.",
+    tagline: "A patient who responds in the moment.",
     description:
-      "Learners engage in a real-time, live video call with a lifelike AI-simulated patient. Adaptive AI responses ensure each simulation feels dynamic and realistic, not scripted.",
+      "Learners speak with a lifelike AI patient over live video. The patient responds to what they ask, so the encounter feels like a conversation instead of a script.",
     gradient: "from-brand-sage/20 to-transparent",
     iconBg: "bg-brand-sage/10 border-brand-sage/20",
     iconColor: "text-[#8B5E3C]",
@@ -24,10 +24,10 @@ const features = [
   {
     number: "02",
     icon: FileCheck,
-    title: "Rapid Rubric-Based Feedback",
-    tagline: "Objective scores. Actionable insight. No waiting.",
+    title: "Rubric-Based Feedback",
+    tagline: "Clear feedback while the case is still fresh.",
     description:
-      "After each session, our evaluator AI agent assesses performance against a custom-defined rubric \u2014 producing an objective score and written narrative. Reports are exportable as PDF.",
+      "After each session, DeepPatient scores the learner against your rubric and explains the result in plain language. Reports can be exported as PDFs.",
     gradient: "from-feedback-cta/20 to-transparent",
     iconBg: "bg-feedback-cta/10 border-feedback-cta/20",
     iconColor: "text-[#8B5E3C]",
@@ -35,10 +35,10 @@ const features = [
   {
     number: "03",
     icon: Settings,
-    title: "Admin & Scenario Control",
+    title: "Scenario Control",
     tagline: "Build the curriculum your program actually needs.",
     description:
-      "Create scenarios from scratch, define patient backstories, set behavioral parameters, and attach custom evaluation rubrics \u2014 all without writing a line of code.",
+      "Create patient scenarios, set the clinical context and patient behaviour, then attach the rubric your program already uses. No coding required.",
     gradient: "from-brand-bark/20 to-transparent",
     iconBg: "bg-brand-bark/10 border-brand-bark/20",
     iconColor: "text-[#8B5E3C]",
@@ -47,9 +47,9 @@ const features = [
     number: "04",
     icon: Users,
     title: "Faculty & Cohort Management",
-    tagline: "See the full picture. Act on what matters.",
+    tagline: "See where a cohort is getting stuck.",
     description:
-      "Assign scenarios to individuals, groups, or entire cohorts. A high-level analytics dashboard aggregates results \u2014 surfacing class-wide learning gaps and tracking completion rates.",
+      "Assign scenarios to learners or cohorts. Faculty can review completion rates and spot skills that need more attention across the class.",
     gradient: "from-faculty-pill/20 to-transparent",
     iconBg: "bg-faculty-pill/10 border-faculty-pill/20",
     iconColor: "text-faculty-pill",
@@ -58,9 +58,9 @@ const features = [
     number: "05",
     icon: LayoutDashboard,
     title: "Learner Dashboard",
-    tagline: "Practice. Review. Improve. Repeat.",
+    tagline: "Every case and report in one place.",
     description:
-      "Every learner gets a dedicated personal dashboard \u2014 view assigned cases, check pending feedback, and browse complete history of transcripts and evaluation reports.",
+      "Learners can see assigned cases, check feedback, and revisit past transcripts and evaluation reports from one dashboard.",
     gradient: "from-subscribe-cta/20 to-transparent",
     iconBg: "bg-subscribe-cta/10 border-subscribe-cta/20",
     iconColor: "text-subscribe-cta",
@@ -69,9 +69,9 @@ const features = [
     number: "06",
     icon: Shield,
     title: "Security & FERPA Alignment",
-    tagline: "Student data protected. Full stop.",
+    tagline: "Student data stays in the right hands.",
     description:
-      "FERPA alignment is built in. All data encrypted in transit and at rest. Strict Role-Based Access Control ensures users only see what they\u2019re supposed to see.",
+      "DeepPatient is designed for FERPA-aligned use, with encryption in transit and at rest. Role-based access limits what each user can see.",
     gradient: "from-success/20 to-transparent",
     iconBg: "bg-success/10 border-success/20",
     iconColor: "text-success",
@@ -115,12 +115,11 @@ const FeaturesSection = () => {
             Platform
           </span>
           <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
-            Everything Your Program Needs.{" "}
-            <span className="text-white/50">Nothing It Doesn{"\u2019"}t.</span>
+            Clinical practice without the scheduling bottleneck.
           </h2>
           <p className="text-gray-400 text-lg leading-relaxed">
-            DeepPatient is an end-to-end platform for clinical skills training built to be
-            lifelike for learners, powerful for faculty, and manageable for admins.
+            Learners get more chances to practise. Faculty get consistent scoring
+            without having to observe every encounter live.
           </p>
         </motion.div>
 

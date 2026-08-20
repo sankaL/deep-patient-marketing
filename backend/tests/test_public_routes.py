@@ -4,6 +4,7 @@ from types import SimpleNamespace
 from uuid import uuid4
 
 from dependencies import get_lead_service, get_notification_service
+from services.supabase_client import SupabaseRestError
 
 from conftest import app, create_client
 
@@ -20,9 +21,6 @@ class FakeNotificationService:
     def __init__(self) -> None:
         self.demo_notifications: list[object] = []
         self.pricing_notifications: list[object] = []
-
-    async def send_newsletter_welcome(self, email: str) -> bool:
-        return True
 
     async def send_demo_request_notifications(self, payload) -> None:
         self.demo_notifications.append(payload)
@@ -49,7 +47,6 @@ def test_demo_request_returns_persisted_request_id():
                 "email": "jane@example.com",
                 "institution": "DeepPatient University",
                 "team_size_text": "10-50 learners",
-                "request_source": "book_demo",
             },
         )
     finally:
@@ -62,31 +59,22 @@ def test_demo_request_returns_persisted_request_id():
     assert len(fake_notifications.demo_notifications) == 1
 
 
-def test_live_preview_demo_request_sends_internal_notification_only():
+def test_demo_request_rejects_removed_live_preview_source():
     fake_notifications = FakeNotificationService()
-    app.dependency_overrides[get_lead_service] = lambda: FakeLeadService()
-    app.dependency_overrides[get_notification_service] = (
-        lambda: fake_notifications
+    client = create_client()
+    response = client.post(
+        "/api/demo-request",
+        json={
+            "name": "Jane Smith",
+            "email": "jane@example.com",
+            "institution": "DeepPatient University",
+            "team_size_text": "10-50 learners",
+            "request_source": "live_preview",
+        },
     )
 
-    try:
-        client = create_client()
-        response = client.post(
-            "/api/demo-request",
-            json={
-                "name": "Jane Smith",
-                "email": "jane@example.com",
-                "institution": "DeepPatient University",
-                "team_size_text": "10-50 learners",
-                "request_source": "live_preview",
-            },
-        )
-    finally:
-        app.dependency_overrides.clear()
-
-    assert response.status_code == 200
-    assert len(fake_notifications.demo_notifications) == 1
-    assert fake_notifications.demo_notifications[0].request_source == "live_preview"
+    assert response.status_code == 422
+    assert fake_notifications.demo_notifications == []
 
 
 def test_pricing_inquiry_returns_persisted_request_id():
@@ -118,3 +106,41 @@ def test_pricing_inquiry_returns_persisted_request_id():
     assert payload["success"] is True
     assert payload["request_id"]
     assert len(fake_notifications.pricing_notifications) == 1
+
+
+class FailingLeadService:
+    async def capture_demo_request(self, payload):
+        raise SupabaseRestError("provider detail that must stay private", 503)
+
+
+def test_demo_request_returns_sanitized_database_error():
+    app.dependency_overrides[get_lead_service] = lambda: FailingLeadService()
+    app.dependency_overrides[get_notification_service] = (
+        lambda: FakeNotificationService()
+    )
+
+    try:
+        response = create_client().post(
+            "/api/demo-request",
+            json={
+                "name": "Jane Smith",
+                "email": "jane@example.com",
+                "institution": "DeepPatient University",
+                "team_size_text": "10-50 learners",
+            },
+        )
+    finally:
+        app.dependency_overrides.clear()
+
+    assert response.status_code == 503
+    assert response.json() == {
+        "detail": "We could not capture your request right now. Please try again later."
+    }
+
+
+def test_removed_application_routes_return_not_found():
+    client = create_client()
+
+    assert client.get("/api/admin/auth/session").status_code == 404
+    assert client.post("/api/tavus/conversations").status_code == 404
+    assert client.post("/api/subscribe", json={"email": "jane@example.com"}).status_code == 404

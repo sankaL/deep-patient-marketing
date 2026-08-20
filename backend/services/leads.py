@@ -24,7 +24,7 @@ class LeadService:
                 "email": str(payload.email).strip(),
                 "institution": payload.institution.strip() or None,
                 "team_size_text": payload.team_size_text.strip() or None,
-                "request_source": payload.request_source,
+                "request_source": "book_demo",
             },
         )
         return CapturedLead(request_id=UUID(str(row["id"])))

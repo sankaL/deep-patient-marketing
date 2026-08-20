@@ -4,15 +4,14 @@ import { useState } from "react";
 import { ArrowRight, Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import logoWhite from "@/assets/brand/deeppatient-logo-white.svg";
-import { LiveSessionPreview } from "@/components/live-session/live-session-preview";
+import { HeroVideo } from "@/components/ui/hero-video";
 import { HeroShapes } from "@/components/ui/shape-landing-hero";
 
 type HeroSectionProps = {
   onBookDemo: () => void;
-  onWatchDemo: () => void;
 };
 
-const HeroSection = ({ onBookDemo, onWatchDemo }: HeroSectionProps) => {
+const HeroSection = ({ onBookDemo }: HeroSectionProps) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
@@ -70,7 +69,7 @@ const HeroSection = ({ onBookDemo, onWatchDemo }: HeroSectionProps) => {
 
       <section
         id="top"
-        className="relative min-h-[780px] overflow-x-clip overflow-y-hidden bg-[#030303] md:min-h-[860px] lg:min-h-[900px]"
+        className="relative overflow-x-clip overflow-y-hidden bg-[#030303]"
       >
         <div className="absolute inset-0 bg-gradient-to-br from-[hsl(38,92%,76%)]/[0.04] via-transparent to-[hsl(26,40%,39%)]/[0.04]" />
         <div className="absolute -right-28 -top-6 z-0 flex flex-col items-end [transform:translateZ(0)] [will-change:transform] sm:-right-44 md:-right-60">
@@ -134,12 +133,12 @@ const HeroSection = ({ onBookDemo, onWatchDemo }: HeroSectionProps) => {
 
           <div className="mx-auto mt-2 flex max-w-fit items-center justify-center space-x-2 rounded-full border border-white/[0.08] bg-white/[0.03] px-4 py-2 backdrop-blur-sm sm:px-5 sm:py-2.5">
             <span className="text-center text-xs font-medium text-brand-sage sm:text-sm">
-              Scalable practice. Measurable outcomes.
+              More practice. Better feedback.
             </span>
             <ArrowRight className="h-4 w-4 text-brand-sage" />
           </div>
 
-          <div className="container mx-auto mt-6 px-4 text-center sm:mt-8">
+          <div className="container mx-auto mt-5 px-4 text-center sm:mt-7">
             <motion.h1
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -151,7 +150,7 @@ const HeroSection = ({ onBookDemo, onWatchDemo }: HeroSectionProps) => {
               className="mx-auto max-w-5xl text-4xl font-extrabold leading-[1.1] tracking-tight md:text-6xl lg:text-7xl"
             >
               <span className="bg-gradient-to-b from-white to-white/80 bg-clip-text text-transparent">
-                Master Clinical Skills
+                Practice Clinical Skills
               </span>{" "}
               <span className="bg-gradient-to-r from-brand-sage via-white/90 to-brand-sage bg-clip-text text-transparent">
                 with an On-Demand
@@ -170,9 +169,8 @@ const HeroSection = ({ onBookDemo, onWatchDemo }: HeroSectionProps) => {
               }}
               className="mx-auto mt-6 max-w-2xl text-base font-light leading-relaxed tracking-wide text-white/40 sm:text-lg"
             >
-              DeepPatient gives medical learners safe, repeatable, and interactive
-              patient encounters, with instant, rubric-based feedback on
-              communication and diagnostic skills.
+              DeepPatient lets medical learners interview a lifelike AI patient,
+              then shows them what they did well and where they need more work.
             </motion.p>
             <motion.div
               initial={{ opacity: 0, y: 30 }}
@@ -182,7 +180,7 @@ const HeroSection = ({ onBookDemo, onWatchDemo }: HeroSectionProps) => {
                 delay: 0.7,
                 ease: [0.25, 0.4, 0.25, 1],
               }}
-              className="mt-8 flex flex-col items-center justify-center space-y-4 sm:mt-10 sm:flex-row sm:space-x-4 sm:space-y-0"
+              className="mt-8 flex items-center justify-center sm:mt-9"
             >
               <button
                 type="button"
@@ -191,16 +189,10 @@ const HeroSection = ({ onBookDemo, onWatchDemo }: HeroSectionProps) => {
               >
                 Book a Demo
               </button>
-              <button
-                type="button"
-                onClick={onWatchDemo}
-                className="h-12 cursor-pointer rounded-full border border-gray-600 px-8 text-base font-medium text-white transition-all hover:bg-white/5"
-              >
-                Watch Demo
-              </button>
             </motion.div>
-            <LiveSessionPreview />
           </div>
+
+          <HeroVideo />
         </div>
       </section>
     </>

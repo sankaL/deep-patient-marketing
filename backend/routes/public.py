@@ -6,12 +6,10 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from dependencies import get_lead_service, get_notification_service
 from models.public import (
-    BasicSuccessResponse,
     DemoRequest,
     DemoRequestResponse,
     PricingInquiryRequest,
     PricingInquiryResponse,
-    SubscribeRequest,
 )
 from services.leads import LeadService
 from services.notifications import NotificationService
@@ -25,19 +23,6 @@ router = APIRouter(tags=["public"])
 @router.get("/api/health")
 def health_check() -> dict[str, str]:
     return {"status": "ok", "service": "deeppatient-marketing"}
-
-
-@router.post("/api/subscribe", response_model=BasicSuccessResponse)
-async def subscribe(
-    payload: SubscribeRequest,
-    notifications: NotificationService = Depends(get_notification_service),
-) -> BasicSuccessResponse:
-    try:
-        await notifications.send_newsletter_welcome(str(payload.email))
-    except Exception:
-        logger.exception("Newsletter welcome email failed.")
-
-    return BasicSuccessResponse(success=True, message="Subscribed successfully")
 
 
 @router.post("/api/demo-request", response_model=DemoRequestResponse)
@@ -61,7 +46,7 @@ async def demo_request(
             "Demo request notifications failed.",
             extra={
                 "request_id": str(captured.request_id),
-                "request_source": payload.request_source,
+                "request_source": "book_demo",
             },
         )
 

@@ -17,7 +17,7 @@ const personas = [
   {
     id: "faculty",
     label: "For Faculty",
-    headline: "Assign, Track, and Identify Cohort-Level Gaps.",
+    headline: "Assign cases and see where the class needs help.",
     icon: GraduationCap,
     color: "faculty-pill",
     items: [
@@ -27,18 +27,18 @@ const personas = [
       },
       {
         icon: BarChart3,
-        text: "View high-level, aggregated results dashboards",
+        text: "Review results across a class or cohort",
       },
       {
         icon: Search,
-        text: "Identify class-wide trends and communication gaps",
+        text: "Spot communication skills that need more practice",
       },
     ],
   },
   {
     id: "learners",
     label: "For Learners",
-    headline: "On-Demand Practice. Actionable Feedback.",
+    headline: "Practise when you are ready. Get feedback right away.",
     icon: BookOpen,
     color: "feedback-cta",
     items: [
@@ -48,7 +48,7 @@ const personas = [
       },
       {
         icon: FileCode,
-        text: "Review full session transcripts and objective scores",
+        text: "Review session transcripts, scores, and written feedback",
       },
       {
         icon: LineChart,
@@ -59,7 +59,7 @@ const personas = [
   {
     id: "admins",
     label: "For Admins",
-    headline: "Full Control Over Your Simulation Content.",
+    headline: "Keep your scenarios and scoring standards in your hands.",
     icon: Shield,
     color: "brand-bark",
     items: [
@@ -69,11 +69,11 @@ const personas = [
       },
       {
         icon: FileCode,
-        text: "Define custom, JSON-based rubrics for automated scoring",
+        text: "Use custom rubrics for automated scoring",
       },
       {
         icon: Users,
-        text: "Manage all Learner and Faculty accounts from one portal",
+        text: "Manage learner and faculty accounts in one place",
       },
     ],
   },
@@ -121,13 +121,13 @@ const PersonasSection = ({ onBookDemo }: PersonasSectionProps) => {
           className="text-center max-w-3xl mx-auto mb-14"
         >
           <span className="text-brand-sage text-sm font-semibold uppercase tracking-[0.2em] mb-4 block">
-            Built for Everyone
+            For Your Team
           </span>
           <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">
-            Why DeepPatient?
+            One platform, different jobs.
           </h2>
           <p className="text-gray-400 text-lg">
-            A Unified Platform for Clinical Education
+            Faculty, learners, and administrators each get the tools they need.
           </p>
         </motion.div>
 

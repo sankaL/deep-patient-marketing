@@ -6,7 +6,6 @@ from uuid import UUID
 from pydantic import BaseModel, EmailStr, Field
 
 
-DemoRequestSource = Literal["book_demo", "live_preview"]
 OrgSizeBucket = Literal[
     "1–50",
     "51–150",
@@ -18,16 +17,13 @@ OrgSizeBucket = Literal[
 ]
 
 
-class SubscribeRequest(BaseModel):
-    email: EmailStr
-
-
 class DemoRequest(BaseModel):
     name: str = Field(min_length=1, max_length=200)
     email: EmailStr
     institution: str = Field(default="", max_length=200)
     team_size_text: str = Field(default="", max_length=120)
-    request_source: DemoRequestSource
+
+    model_config = {"extra": "forbid"}
 
 
 class DemoRequestResponse(BaseModel):
@@ -52,8 +48,3 @@ class PricingInquiryResponse(BaseModel):
     success: bool
     message: str
     request_id: UUID
-
-
-class BasicSuccessResponse(BaseModel):
-    success: bool
-    message: str
