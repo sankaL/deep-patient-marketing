@@ -65,3 +65,17 @@ def test_pricing_leads_are_persisted_to_pricing_requests():
     assert client.payload["org_size_bucket"] == "51–150"
     assert client.payload["source"] == "Conference"
     assert client.payload["message"] == "We are evaluating pilots."
+
+
+def test_supabase_client_init_with_database_url():
+    from config import SupabaseSettings
+    from services.supabase_client import SupabaseRestClient
+
+    settings = SupabaseSettings(
+        url="",
+        service_role_key="",
+        request_timeout_seconds=5.0,
+        database_url="postgresql://user:pass@localhost:5432/db",
+    )
+    client = SupabaseRestClient(settings)
+    assert client._database_url == "postgresql://user:pass@localhost:5432/db"

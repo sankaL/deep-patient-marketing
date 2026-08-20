@@ -142,9 +142,9 @@ export function ContactModal({
             </div>
 
             {isSuccess ? (
-              <div className="space-y-5 px-6 py-6">
+              <div className="flex flex-col items-center px-6 py-6 text-center space-y-5">
                 <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-cream-dark/80">
-                  <CheckCircle2 className="h-7 w-7 text-brand-forest" />
+                  <CheckCircle2 className="h-7 w-7 text-success" />
                 </div>
                 <div className="space-y-2">
                   <h3 className="text-lg font-semibold text-brand-forest">{successTitle}</h3>

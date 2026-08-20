@@ -23,6 +23,7 @@ class SupabaseSettings:
     url: str
     service_role_key: str
     request_timeout_seconds: float
+    database_url: str | None = None
 
 
 @dataclass(frozen=True)
@@ -62,14 +63,17 @@ def _read_float(name: str, default: float, minimum: float | None = None) -> floa
 def get_supabase_settings() -> SupabaseSettings:
     load_environment()
 
+    database_url = os.getenv("DATABASE_URL", "").strip() or None
     url = os.getenv("SUPABASE_URL", "").strip().rstrip("/")
     service_role_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "").strip()
-    if not url or not service_role_key:
+
+    if not database_url and (not url or not service_role_key):
         raise SupabaseConfigurationError("Supabase is not configured yet.")
 
     return SupabaseSettings(
         url=url,
         service_role_key=service_role_key,
+        database_url=database_url,
         request_timeout_seconds=_read_float(
             "SUPABASE_REQUEST_TIMEOUT_SECONDS", 10.0, minimum=1.0
         ),
