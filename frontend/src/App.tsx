@@ -23,7 +23,7 @@ function MarketingSite() {
   };
 
   return (
-    <div className="min-h-screen bg-[hsl(187,21%,10%)]">
+    <div className="min-h-screen bg-surface-1">
       <HeroSection onBookDemo={handleBookDemo} />
       <FeaturesSection />
       <PersonasSection onBookDemo={handleBookDemo} />
@@ -38,7 +38,7 @@ function MarketingSite() {
         onSubmit={handleDemoSubmit}
         submitLabel="Book a Demo"
         submittingLabel="Saving..."
-        submitButtonClassName="bg-brand-sage text-brand-forest-dark shadow-[0_0_28px_hsl(38,92%,76%,0.32)]"
+        submitButtonClassName="bg-brand-forest text-white shadow-[0_10px_24px_hsl(187,21%,16%,0.18)]"
         showSuccessState
         successTitle="Thanks. We’ll be in touch."
         successMessage="We’ve received your request and will follow up soon."

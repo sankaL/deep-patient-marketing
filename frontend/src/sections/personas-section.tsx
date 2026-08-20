@@ -93,10 +93,10 @@ const inactiveTabMap: Record<string, string> = {
 };
 
 const iconColorMap: Record<string, string> = {
-  "faculty-pill": "text-faculty-pill bg-faculty-pill/10 border-faculty-pill/20",
+  "faculty-pill": "text-faculty-pill bg-faculty-pill/10 border-faculty-pill/25",
   "feedback-cta":
-    "text-feedback-cta bg-feedback-cta/10 border-feedback-cta/20",
-  "brand-bark": "text-brand-bark bg-brand-bark/10 border-brand-bark/20",
+    "text-feedback-cta bg-feedback-cta/10 border-feedback-cta/25",
+  "brand-bark": "text-[#c38b5f] bg-brand-bark/12 border-brand-bark/30",
 };
 
 type PersonasSectionProps = {
@@ -108,8 +108,9 @@ const PersonasSection = ({ onBookDemo }: PersonasSectionProps) => {
   const current = personas.find((p) => p.id === active)!;
 
   return (
-    <section className="relative py-24 md:py-32 bg-black">
+    <section id="team" className="relative border-y border-white/6 bg-black py-24 md:py-32">
       <div className="absolute inset-0 bg-noise opacity-20" />
+      <div className="absolute left-1/2 top-1/2 h-[28rem] w-[48rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand-forest/35 blur-[10rem]" />
 
       <div className="relative container mx-auto px-4">
         {/* Section header */}
@@ -123,10 +124,10 @@ const PersonasSection = ({ onBookDemo }: PersonasSectionProps) => {
           <span className="text-brand-sage text-sm font-semibold uppercase tracking-[0.2em] mb-4 block">
             For Your Team
           </span>
-          <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">
+          <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-white mb-4">
             One platform, different jobs.
           </h2>
-          <p className="text-gray-400 text-lg">
+          <p className="text-white/55 text-lg">
             Faculty, learners, and administrators each get the tools they need.
           </p>
         </motion.div>
@@ -159,8 +160,8 @@ const PersonasSection = ({ onBookDemo }: PersonasSectionProps) => {
             transition={{ duration: 0.35 }}
             className="max-w-2xl mx-auto"
           >
-            <div className="rounded-2xl border border-white/8 bg-white/[0.03] p-8 backdrop-blur-sm md:p-10">
-              <h3 className="text-2xl font-bold text-white mb-6">
+            <div className="rounded-2xl bg-white/[0.025] p-8 shadow-[0_20px_60px_rgba(0,0,0,0.35)] ring-1 ring-white/12 backdrop-blur-sm md:p-10">
+              <h3 className="text-balance text-2xl font-bold text-white mb-6">
                 {current.headline}
               </h3>
 
@@ -178,7 +179,7 @@ const PersonasSection = ({ onBookDemo }: PersonasSectionProps) => {
                     >
                       <item.icon className="h-5 w-5" />
                     </div>
-                    <span className="text-gray-300 pt-2 leading-relaxed">
+                    <span className="text-white/72 pt-2 leading-relaxed">
                       {item.text}
                     </span>
                   </motion.li>
@@ -189,7 +190,7 @@ const PersonasSection = ({ onBookDemo }: PersonasSectionProps) => {
                 <button
                   type="button"
                   onClick={onBookDemo}
-                  className="inline-flex items-center gap-2 h-11 rounded-full bg-brand-sage px-7 text-sm font-semibold text-brand-forest-dark hover:brightness-105 transition-all cursor-pointer shadow-[0_0_24px_hsl(38,92%,76%,0.26)]"
+                  className="inline-flex h-11 cursor-pointer items-center gap-2 rounded-full bg-brand-sage px-7 text-sm font-semibold text-brand-forest-dark shadow-[0_12px_28px_hsl(38,92%,76%,0.2)] transition-[transform,filter] hover:brightness-105 active:scale-[0.97]"
                 >
                   Book a Demo
                   <ArrowRight className="h-4 w-4" />

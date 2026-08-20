@@ -23,20 +23,20 @@ const HeroSection = ({ onBookDemo }: HeroSectionProps) => {
             animate={{ y: 0 }}
             exit={{ y: "-100%" }}
             transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-50 flex flex-col bg-black/95 p-4 backdrop-blur-xl md:hidden"
+            className="fixed inset-0 z-50 flex flex-col bg-surface-1/95 p-5 backdrop-blur-xl md:hidden"
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <img src={logoWhite} alt="DeepPatient" className="h-8 w-8" />
-                <span className="text-xl font-bold text-white">
+                <img src={logoWhite} alt="DeepPatient" className="h-8 w-8 brightness-0 opacity-80" />
+                <span className="text-xl font-bold text-brand-forest">
                   DeepPatient
                 </span>
               </div>
               <button
                 onClick={() => setMobileMenuOpen(false)}
-                className="cursor-pointer"
+                className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-brand-forest/10 bg-white"
               >
-                <X className="h-6 w-6 text-white" />
+                <X className="h-5 w-5 text-brand-forest" />
               </button>
             </div>
             <div className="mt-8 flex flex-col space-y-6">
@@ -57,7 +57,7 @@ const HeroSection = ({ onBookDemo }: HeroSectionProps) => {
                     setMobileMenuOpen(false);
                     onBookDemo();
                   }}
-                  className="h-12 w-full cursor-pointer rounded-full bg-brand-sage px-8 text-base font-semibold text-brand-forest-dark shadow-[0_0_24px_hsl(38,92%,76%,0.28)] transition-all hover:brightness-105"
+                  className="h-12 w-full cursor-pointer rounded-full bg-brand-forest px-8 text-base font-semibold text-white shadow-[0_12px_26px_hsl(187,21%,16%,0.18)] transition-[transform,background-color] hover:bg-brand-forest-light active:scale-[0.97]"
                 >
                   Book a Demo
                 </button>
@@ -69,37 +69,35 @@ const HeroSection = ({ onBookDemo }: HeroSectionProps) => {
 
       <section
         id="top"
-        className="relative overflow-x-clip overflow-y-hidden bg-[#030303]"
+        className="relative overflow-x-clip overflow-y-hidden bg-surface-1"
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-[hsl(38,92%,76%)]/[0.04] via-transparent to-[hsl(26,40%,39%)]/[0.04]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_120%_80%_at_50%_0%,white_0%,hsl(40,43%,98%)_60%,hsl(40,43%,98%)_100%)]" />
         <div className="absolute -right-28 -top-6 z-0 flex flex-col items-end [transform:translateZ(0)] [will-change:transform] sm:-right-44 md:-right-60">
-          <div className="z-1 h-[8rem] w-[22rem] rounded-full bg-gradient-to-b from-[hsl(38,92%,76%)]/30 to-[hsl(187,21%,16%)]/20 blur-[3rem] [transform:translateZ(0)] [will-change:transform] sm:h-[9rem] sm:w-[42rem] md:h-[10rem] md:w-[60rem]"></div>
-          <div className="z-1 h-[8rem] w-[32rem] rounded-full bg-gradient-to-b from-[hsl(26,40%,39%)]/30 to-[hsl(40,89%,55%)]/20 blur-[3rem] [transform:translateZ(0)] [will-change:transform] sm:h-[9rem] sm:w-[58rem] md:h-[10rem] md:w-[90rem]"></div>
-          <div className="z-1 h-[8rem] w-[22rem] rounded-full bg-gradient-to-b from-[hsl(40,89%,55%)]/30 to-[hsl(187,21%,22%)]/20 blur-[3rem] [transform:translateZ(0)] [will-change:transform] sm:h-[9rem] sm:w-[42rem] md:h-[10rem] md:w-[60rem]"></div>
+          <div className="z-1 h-[8rem] w-[22rem] rounded-full bg-gradient-to-b from-brand-sage/50 to-brand-cream/20 blur-[3rem] [transform:translateZ(0)] [will-change:transform] sm:h-[9rem] sm:w-[42rem] md:h-[10rem] md:w-[60rem]"></div>
+          <div className="z-1 h-[8rem] w-[32rem] rounded-full bg-gradient-to-b from-brand-bark/10 to-feedback-cta/15 blur-[3rem] [transform:translateZ(0)] [will-change:transform] sm:h-[9rem] sm:w-[58rem] md:h-[10rem] md:w-[90rem]"></div>
         </div>
-        <div className="absolute inset-0 z-0 bg-noise opacity-30 [will-change:opacity]"></div>
+        <div className="absolute inset-0 z-0 bg-noise opacity-40 [mask-image:linear-gradient(to_bottom,black_0%,black_45%,transparent_85%)] [will-change:opacity]"></div>
 
         <HeroShapes />
 
         <div
-          className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-t from-[hsl(187,21%,10%)] via-[hsl(187,21%,10%)]/20 to-[#030303]/80"
+          className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-t from-surface-1 via-transparent to-white/35"
           style={{ backgroundSize: "100% 100%" }}
         />
 
         <div
-          className="pointer-events-none absolute bottom-0 left-0 right-0 z-[2] h-[55%]"
+          className="pointer-events-none absolute bottom-0 left-0 right-0 z-[2] h-[55%] [mask-image:linear-gradient(to_bottom,black_0%,black_75%,transparent_100%)]"
           aria-hidden="true"
         >
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[hsl(187,30%,10%)]/40 to-[hsl(187,21%,10%)]" />
-          <div className="absolute bottom-0 left-1/2 h-64 w-[26rem] -translate-x-1/2 rounded-full bg-[hsl(187,60%,25%)]/12 blur-[8rem] sm:w-[48rem] md:h-72 md:w-[80rem] md:blur-[10rem]" />
-          <div className="absolute bottom-8 left-1/2 h-32 w-[18rem] -translate-x-1/2 rounded-full bg-[hsl(187,70%,40%)]/6 blur-[6rem] sm:w-[30rem] md:h-40 md:w-[40rem] md:blur-[8rem]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-surface-1/40 to-surface-1" />
+          <div className="absolute bottom-12 left-1/2 h-64 w-[26rem] -translate-x-1/2 rounded-full bg-brand-sage/20 blur-[8rem] sm:w-[48rem] md:h-72 md:w-[80rem] md:blur-[10rem]" />
         </div>
 
         <div className="relative z-10 pt-2 md:pt-4">
-          <nav className="container mx-auto flex items-center justify-between px-4 py-4">
+          <nav className="container mx-auto flex items-center justify-between px-4 py-5">
             <a href="#top" className="flex items-center gap-3">
-              <img src={logoWhite} alt="DeepPatient" className="h-8 w-8" />
-              <span className="text-xl font-bold tracking-tight text-white">
+              <img src={logoWhite} alt="DeepPatient" className="h-8 w-8 brightness-0 opacity-80" />
+              <span className="text-xl font-bold tracking-tight text-brand-forest">
                 DeepPatient
               </span>
             </a>
@@ -112,30 +110,30 @@ const HeroSection = ({ onBookDemo }: HeroSectionProps) => {
               <button
                 type="button"
                 onClick={onBookDemo}
-                className="h-11 cursor-pointer rounded-full bg-brand-sage px-7 text-sm font-semibold text-brand-forest-dark shadow-[0_0_24px_hsl(38,92%,76%,0.28)] transition-all hover:brightness-105"
+                className="h-11 cursor-pointer rounded-full bg-brand-forest px-7 text-sm font-semibold text-white shadow-[0_10px_24px_hsl(187,21%,16%,0.16)] transition-[transform,background-color] hover:bg-brand-forest-light active:scale-[0.97]"
               >
                 Book a Demo
               </button>
             </div>
 
             <button
-              className="cursor-pointer md:hidden"
+              className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-brand-forest/10 bg-white/70 md:hidden"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
               <span className="sr-only">Toggle menu</span>
               {mobileMenuOpen ? (
-                <X className="h-6 w-6 text-white" />
+                <X className="h-5 w-5 text-brand-forest" />
               ) : (
-                <Menu className="h-6 w-6 text-white" />
+                <Menu className="h-5 w-5 text-brand-forest" />
               )}
             </button>
           </nav>
 
-          <div className="mx-auto mt-2 flex max-w-fit items-center justify-center space-x-2 rounded-full border border-white/[0.08] bg-white/[0.03] px-4 py-2 backdrop-blur-sm sm:px-5 sm:py-2.5">
-            <span className="text-center text-xs font-medium text-brand-sage sm:text-sm">
+          <div className="mx-auto mt-6 flex max-w-fit items-center justify-center space-x-2 rounded-full border border-brand-forest/10 bg-white/70 px-4 py-2 shadow-sm backdrop-blur-sm sm:px-5 sm:py-2.5">
+            <span className="text-center text-xs font-semibold text-brand-bark sm:text-sm">
               More practice. Better feedback.
             </span>
-            <ArrowRight className="h-4 w-4 text-brand-sage" />
+            <ArrowRight className="h-4 w-4 text-brand-bark" />
           </div>
 
           <div className="container mx-auto mt-5 px-4 text-center sm:mt-7">
@@ -147,15 +145,15 @@ const HeroSection = ({ onBookDemo }: HeroSectionProps) => {
                 delay: 0.3,
                 ease: [0.25, 0.4, 0.25, 1],
               }}
-              className="mx-auto max-w-5xl text-4xl font-extrabold leading-[1.1] tracking-tight md:text-6xl lg:text-7xl"
+              className="mx-auto max-w-5xl text-balance text-4xl font-extrabold leading-[1.05] tracking-[-0.045em] text-brand-forest md:text-6xl lg:text-7xl"
             >
-              <span className="bg-gradient-to-b from-white to-white/80 bg-clip-text text-transparent">
+              <span>
                 Practice Clinical Skills
               </span>{" "}
-              <span className="bg-gradient-to-r from-brand-sage via-white/90 to-brand-sage bg-clip-text text-transparent">
+              <span className="text-brand-bark">
                 with an On-Demand
               </span>{" "}
-              <span className="bg-gradient-to-b from-white to-white/80 bg-clip-text text-transparent">
+              <span>
                 AI Patient
               </span>
             </motion.h1>
@@ -167,7 +165,7 @@ const HeroSection = ({ onBookDemo }: HeroSectionProps) => {
                 delay: 0.5,
                 ease: [0.25, 0.4, 0.25, 1],
               }}
-              className="mx-auto mt-6 max-w-2xl text-base font-light leading-relaxed tracking-wide text-white/40 sm:text-lg"
+              className="mx-auto mt-6 max-w-2xl text-pretty text-base leading-relaxed text-brand-forest/65 sm:text-lg"
             >
               DeepPatient lets medical learners interview a lifelike AI patient,
               then shows them what they did well and where they need more work.
@@ -185,7 +183,7 @@ const HeroSection = ({ onBookDemo }: HeroSectionProps) => {
               <button
                 type="button"
                 onClick={onBookDemo}
-                className="h-12 cursor-pointer rounded-full bg-brand-sage px-8 text-base font-semibold text-brand-forest-dark shadow-[0_0_32px_hsl(38,92%,76%,0.32)] transition-all hover:brightness-105"
+                className="h-12 cursor-pointer rounded-full bg-brand-forest px-8 text-base font-semibold text-white shadow-[0_12px_26px_hsl(187,21%,16%,0.18)] transition-[transform,background-color] hover:bg-brand-forest-light active:scale-[0.97]"
               >
                 Book a Demo
               </button>
@@ -203,7 +201,7 @@ function NavItem({ label, href }: { label: string; href: string }) {
   return (
     <a
       href={href}
-      className="flex items-center text-sm text-gray-300 hover:text-white transition-colors cursor-pointer"
+      className="flex items-center text-sm font-medium text-brand-forest/65 hover:text-brand-forest transition-colors cursor-pointer"
     >
       <span>{label}</span>
     </a>
@@ -223,10 +221,10 @@ function MobileNavItem({
     <a
       href={href}
       onClick={onNavigate}
-      className="flex items-center justify-between border-b border-gray-800 pb-2 text-lg text-white cursor-pointer"
+      className="flex items-center justify-between border-b border-brand-forest/10 pb-4 text-lg font-medium text-brand-forest cursor-pointer"
     >
       <span>{label}</span>
-      <ArrowRight className="h-4 w-4 text-gray-400" />
+      <ArrowRight className="h-4 w-4 text-brand-bark" />
     </a>
   );
 }

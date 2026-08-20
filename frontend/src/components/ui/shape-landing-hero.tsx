@@ -9,7 +9,7 @@ function ElegantShape({
   width = 400,
   height = 100,
   rotate = 0,
-  gradient = "from-white/[0.08]",
+  gradient = "from-brand-sage/30",
 }: {
   className?: string;
   delay?: number;
@@ -61,8 +61,8 @@ function ElegantShape({
             "absolute inset-0 rounded-full",
             "bg-gradient-to-r to-transparent",
             gradient,
-            "border-2 border-white/[0.12]",
-            "shadow-[0_8px_32px_0_rgba(255,255,255,0.06)]"
+            "border border-brand-forest/[0.08]",
+            "shadow-[0_12px_40px_hsl(187,21%,16%,0.06)]"
           )}
         />
       </motion.div>
@@ -78,7 +78,7 @@ function HeroShapes() {
         width={600}
         height={140}
         rotate={12}
-        gradient="from-[hsl(38,92%,76%)]/[0.12]"
+        gradient="from-[hsl(38,92%,76%)]/[0.34]"
         className="left-[-10%] md:left-[-5%] top-[15%] md:top-[20%]"
       />
       <ElegantShape
@@ -94,7 +94,7 @@ function HeroShapes() {
         width={300}
         height={80}
         rotate={-8}
-        gradient="from-[hsl(187,21%,22%)]/[0.15]"
+        gradient="from-[hsl(187,21%,22%)]/[0.10]"
         className="left-[5%] md:left-[10%] bottom-[5%] md:bottom-[10%]"
       />
       <ElegantShape
@@ -102,7 +102,7 @@ function HeroShapes() {
         width={200}
         height={60}
         rotate={20}
-        gradient="from-[hsl(40,89%,55%)]/[0.12]"
+        gradient="from-[hsl(40,89%,55%)]/[0.18]"
         className="right-[15%] md:right-[20%] top-[10%] md:top-[15%]"
       />
       <ElegantShape

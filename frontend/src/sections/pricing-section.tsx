@@ -124,10 +124,10 @@ const PricingSection = ({ onBookDemo }: PricingSectionProps) => {
   return (
     <section
       id="pricing"
-      className="relative overflow-hidden bg-black py-24 scroll-mt-28 md:py-32 md:scroll-mt-32"
+      className="relative overflow-hidden bg-surface-1 py-24 scroll-mt-28 md:py-32 md:scroll-mt-32"
     >
-      <div className="absolute inset-0 bg-noise opacity-20" />
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[50rem] h-[25rem] bg-brand-sage/6 rounded-full blur-[12rem]" />
+      <div className="absolute inset-0 bg-noise opacity-30" />
+      <div className="absolute left-1/2 top-0 h-[25rem] w-[50rem] -translate-x-1/2 rounded-full bg-brand-sage/20 blur-[12rem]" />
 
       <div className="relative container mx-auto px-4">
         {/* Header */}
@@ -138,13 +138,13 @@ const PricingSection = ({ onBookDemo }: PricingSectionProps) => {
           transition={{ duration: 0.6 }}
           className="text-center max-w-3xl mx-auto mb-16"
         >
-          <span className="text-brand-sage text-sm font-semibold uppercase tracking-[0.2em] mb-4 block">
+          <span className="text-brand-bark text-sm font-semibold uppercase tracking-[0.2em] mb-4 block">
             Pricing
           </span>
-          <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
+          <h2 className="text-balance text-3xl md:text-5xl font-bold tracking-tight text-brand-forest mb-6">
             Pricing built around your program.
           </h2>
-          <p className="text-gray-400 text-lg leading-relaxed">
+          <p className="text-pretty text-brand-forest/60 text-lg leading-relaxed">
             Pricing depends on the size of your institution and how you plan to
             use DeepPatient. Tell us what you need and we’ll prepare a proposal.
           </p>
@@ -158,23 +158,23 @@ const PricingSection = ({ onBookDemo }: PricingSectionProps) => {
           transition={{ duration: 0.6, delay: 0.1 }}
           className="max-w-2xl mx-auto mb-20"
         >
-          <div className="rounded-2xl border border-white/8 bg-white/[0.03] backdrop-blur-sm p-8 md:p-10">
+          <div className="rounded-2xl bg-white p-8 shadow-[0_1px_2px_hsl(187,21%,16%,0.05),0_14px_38px_hsl(187,21%,16%,0.07)] ring-1 ring-brand-forest/8 md:p-10">
             <div className="flex items-center gap-3 mb-6">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-sage/10 border border-brand-sage/20">
-                <Sparkles className="h-5 w-5 text-brand-sage" />
+                <Sparkles className="h-5 w-5 text-brand-bark" />
               </div>
-              <h3 className="text-xl font-semibold text-white">
+              <h3 className="text-xl font-semibold text-brand-forest">
                 Included in Every Plan
               </h3>
             </div>
-            <p className="text-gray-400 text-sm mb-6">
+            <p className="text-brand-forest/55 text-sm mb-6">
               Every plan includes the full platform. We do not lock core tools behind higher tiers.
             </p>
             <ul className="space-y-3">
               {included.map((item) => (
                 <li key={item} className="flex items-start gap-3">
-                  <Check className="h-4 w-4 text-brand-sage mt-0.5 flex-shrink-0" />
-                  <span className="text-gray-300 text-sm">{item}</span>
+                  <Check className="h-4 w-4 text-brand-bark mt-0.5 flex-shrink-0" />
+                  <span className="text-brand-forest/68 text-sm">{item}</span>
                 </li>
               ))}
             </ul>
@@ -189,7 +189,7 @@ const PricingSection = ({ onBookDemo }: PricingSectionProps) => {
           transition={{ duration: 0.6, delay: 0.15 }}
           className="max-w-3xl mx-auto mb-20"
         >
-          <h3 className="text-2xl font-bold text-white text-center mb-10">
+          <h3 className="text-2xl font-bold text-brand-forest text-center mb-10">
             How It Works
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -202,11 +202,11 @@ const PricingSection = ({ onBookDemo }: PricingSectionProps) => {
                 transition={{ duration: 0.4, delay: i * 0.12 }}
                 className="text-center"
               >
-                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-brand-sage/30 bg-brand-sage/10 text-brand-sage font-bold text-lg">
+                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-brand-bark/15 bg-brand-sage/45 text-brand-bark font-bold text-lg">
                   {step.number}
                 </div>
-                <h4 className="text-white font-semibold mb-2">{step.title}</h4>
-                <p className="text-gray-400 text-sm leading-relaxed">{step.description}</p>
+                <h4 className="text-brand-forest font-semibold mb-2">{step.title}</h4>
+                <p className="text-brand-forest/55 text-sm leading-relaxed">{step.description}</p>
               </motion.div>
             ))}
           </div>
@@ -220,11 +220,11 @@ const PricingSection = ({ onBookDemo }: PricingSectionProps) => {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="max-w-2xl mx-auto mb-24"
         >
-          <div className="rounded-2xl border border-white/10 bg-white/[0.04] backdrop-blur-sm p-8 md:p-10">
-            <h3 className="text-2xl font-bold text-white mb-2 text-center">
+          <div className="rounded-2xl bg-white p-8 shadow-[0_1px_2px_hsl(187,21%,16%,0.05),0_18px_50px_hsl(187,21%,16%,0.09)] ring-1 ring-brand-forest/9 md:p-10">
+            <h3 className="text-2xl font-bold text-brand-forest mb-2 text-center">
               Request a Proposal
             </h3>
-            <p className="text-gray-400 text-sm text-center mb-8">
+            <p className="text-brand-forest/55 text-sm text-center mb-8">
               Tell us what your program needs and we’ll prepare a quote.
             </p>
 
@@ -233,8 +233,8 @@ const PricingSection = ({ onBookDemo }: PricingSectionProps) => {
                 <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-success/10 border border-success/30">
                   <Check className="h-7 w-7 text-success" />
                 </div>
-                <h4 className="text-xl font-semibold text-white mb-2">Thank you!</h4>
-                <p className="text-gray-400 text-sm">
+                <h4 className="text-xl font-semibold text-brand-forest mb-2">Thank you!</h4>
+                <p className="text-brand-forest/55 text-sm">
                   We{"\u2019"}ll review your details and reach out within one business day.
                 </p>
               </div>
@@ -328,10 +328,10 @@ const PricingSection = ({ onBookDemo }: PricingSectionProps) => {
                 <button
                   type="submit"
                   disabled={status === "submitting"}
-                  className="w-full h-12 rounded-full bg-brand-sage text-brand-forest-dark font-semibold text-sm hover:brightness-105 transition-all cursor-pointer disabled:opacity-60 shadow-[0_0_28px_hsl(38,92%,76%,0.3)] flex items-center justify-center gap-2"
+                  className="flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-brand-forest text-sm font-semibold text-white shadow-[0_12px_26px_hsl(187,21%,16%,0.18)] transition-[transform,background-color] hover:bg-brand-forest-light active:scale-[0.99] disabled:opacity-60"
                 >
                   {status === "submitting" ? (
-                    <div className="h-4 w-4 border-2 border-brand-forest-dark/30 border-t-brand-forest-dark rounded-full animate-spin" />
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
                   ) : (
                     <>
                       Request Pricing
@@ -352,23 +352,23 @@ const PricingSection = ({ onBookDemo }: PricingSectionProps) => {
           transition={{ duration: 0.6, delay: 0.25 }}
           className="max-w-2xl mx-auto mb-20"
         >
-          <h3 className="text-2xl font-bold text-white text-center mb-8">
+          <h3 className="text-2xl font-bold text-brand-forest text-center mb-8">
             Frequently Asked Questions
           </h3>
           <div className="space-y-3">
             {faqs.map((faq, i) => (
               <div
                 key={i}
-                className="rounded-xl border border-white/8 bg-white/[0.02] overflow-hidden"
+                className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-brand-forest/8"
               >
                 <button
                   type="button"
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
                   className="w-full flex items-center justify-between px-6 py-4 text-left cursor-pointer"
                 >
-                  <span className="text-sm font-medium text-white pr-4">{faq.q}</span>
+                  <span className="text-sm font-medium text-brand-forest pr-4">{faq.q}</span>
                   <ChevronDown
-                    className={`h-4 w-4 text-gray-400 flex-shrink-0 transition-transform duration-200 ${
+                    className={`h-4 w-4 text-brand-bark flex-shrink-0 transition-transform duration-200 ${
                       openFaq === i ? "rotate-180" : ""
                     }`}
                   />
@@ -382,7 +382,7 @@ const PricingSection = ({ onBookDemo }: PricingSectionProps) => {
                       transition={{ duration: 0.2 }}
                       className="overflow-hidden"
                     >
-                      <p className="px-6 pb-4 text-sm text-gray-400 leading-relaxed">
+                      <p className="px-6 pb-4 text-sm text-brand-forest/58 leading-relaxed">
                         {faq.a}
                       </p>
                     </motion.div>
@@ -401,11 +401,11 @@ const PricingSection = ({ onBookDemo }: PricingSectionProps) => {
           transition={{ duration: 0.5 }}
           className="text-center"
         >
-          <p className="text-gray-500 text-sm mb-3">Not ready for a proposal yet?</p>
+          <p className="text-brand-forest/50 text-sm mb-3">Not ready for a proposal yet?</p>
           <button
             type="button"
             onClick={onBookDemo}
-            className="inline-flex items-center gap-2 text-brand-sage font-medium text-sm hover:underline underline-offset-4"
+            className="inline-flex items-center gap-2 text-brand-bark font-medium text-sm hover:underline underline-offset-4"
           >
             Book a Demo
             <ArrowRight className="h-4 w-4" />
@@ -427,9 +427,9 @@ function FormField({
 }) {
   return (
     <div>
-      <label className="block text-sm text-gray-300 mb-1.5">
+      <label className="block text-sm text-brand-forest/70 mb-1.5">
         {label}
-        {required && <span className="text-brand-sage ml-0.5">*</span>}
+        {required && <span className="text-brand-bark ml-0.5">*</span>}
       </label>
       {children}
     </div>

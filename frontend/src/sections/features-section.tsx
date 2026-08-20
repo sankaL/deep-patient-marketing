@@ -97,10 +97,12 @@ const FeaturesSection = () => {
   return (
     <section
       id="features"
-      className="relative bg-[hsl(187,21%,10%)] py-24 scroll-mt-28 md:py-32 md:scroll-mt-32"
+      className="relative overflow-hidden bg-surface-1 py-24 scroll-mt-28 md:py-32 md:scroll-mt-32"
     >
-      <div className="absolute top-0 left-0 right-0 h-48 bg-gradient-to-b from-transparent to-[hsl(187,21%,10%)] pointer-events-none z-0" aria-hidden="true" />
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[40rem] h-[20rem] bg-brand-sage/8 rounded-full blur-[8rem]" />
+      <div
+        className="pointer-events-none absolute left-1/2 top-0 h-[22rem] w-[46rem] -translate-x-1/2 rounded-full bg-brand-sage/12 blur-[9rem] [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_75%)]"
+        aria-hidden="true"
+      />
 
       <div className="relative container mx-auto px-4">
         {/* Section header */}
@@ -111,13 +113,13 @@ const FeaturesSection = () => {
           transition={{ duration: 0.6 }}
           className="text-center max-w-3xl mx-auto mb-20"
         >
-          <span className="text-brand-sage text-sm font-semibold uppercase tracking-[0.2em] mb-4 block">
+          <span className="text-brand-bark text-sm font-semibold uppercase tracking-[0.2em] mb-4 block">
             Platform
           </span>
-          <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
+          <h2 className="text-balance text-3xl md:text-5xl font-bold tracking-tight text-brand-forest mb-6">
             Clinical practice without the scheduling bottleneck.
           </h2>
-          <p className="text-gray-400 text-lg leading-relaxed">
+          <p className="text-pretty text-brand-forest/60 text-lg leading-relaxed">
             Learners get more chances to practise. Faculty get consistent scoring
             without having to observe every encounter live.
           </p>
@@ -132,7 +134,7 @@ const FeaturesSection = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="group relative rounded-2xl border border-white/8 bg-white/[0.03] backdrop-blur-sm p-8 hover:border-white/15 transition-all duration-300"
+              className="group relative overflow-hidden rounded-2xl bg-white p-8 shadow-[0_1px_2px_hsl(187,21%,16%,0.05),0_12px_32px_hsl(187,21%,16%,0.06)] ring-1 ring-brand-forest/8 transition-[transform,box-shadow] duration-300 hover:-translate-y-1 hover:shadow-[0_2px_3px_hsl(187,21%,16%,0.06),0_20px_44px_hsl(187,21%,16%,0.1)]"
             >
               <div className={`absolute inset-0 rounded-2xl bg-gradient-to-b ${feat.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
               <div className="relative z-10">
@@ -140,17 +142,17 @@ const FeaturesSection = () => {
                   <div className={`flex h-12 w-12 items-center justify-center rounded-xl border ${feat.iconBg}`}>
                     <feat.icon className={`h-6 w-6 ${feat.iconColor}`} />
                   </div>
-                  <span className="text-xs font-bold uppercase tracking-[0.25em] text-white/25">
+                  <span className="text-xs font-bold uppercase tracking-[0.25em] text-brand-forest/25">
                     {feat.number}
                   </span>
                 </div>
-                <h3 className="text-xl font-semibold text-white mb-2">
+                <h3 className="text-xl font-semibold text-brand-forest mb-2">
                   {feat.title}
                 </h3>
-                <p className="text-brand-sage/80 text-sm font-medium mb-3">
+                <p className="text-brand-bark text-sm font-medium mb-3">
                   {feat.tagline}
                 </p>
-                <p className="text-gray-400 leading-relaxed text-sm">
+                <p className="text-brand-forest/58 leading-relaxed text-sm">
                   {feat.description}
                 </p>
               </div>
@@ -166,32 +168,32 @@ const FeaturesSection = () => {
           transition={{ duration: 0.6 }}
           className="mx-auto max-w-4xl"
         >
-          <h3 className="text-2xl font-bold text-white text-center mb-8">
+          <h3 className="text-2xl font-bold text-brand-forest text-center mb-8">
             Who Gets What
           </h3>
-          <div className="rounded-2xl border border-white/8 bg-white/[0.02] overflow-hidden">
-            <div className={`grid ${featureTableColumns} gap-3 border-b border-white/8 bg-white/[0.03] px-4 py-4 sm:gap-4 sm:px-6`}>
-              <div className="text-xs font-semibold text-white/60 sm:text-sm">
+          <div className="overflow-hidden rounded-2xl bg-white shadow-[0_12px_36px_hsl(187,21%,16%,0.06)] ring-1 ring-brand-forest/8">
+            <div className={`grid ${featureTableColumns} gap-3 border-b border-brand-forest/8 bg-brand-cream-dark/55 px-4 py-4 sm:gap-4 sm:px-6`}>
+              <div className="text-xs font-semibold text-brand-forest/65 sm:text-sm">
                 Feature
               </div>
-              <div className="text-center text-xs font-semibold text-white/60 sm:text-sm">
+              <div className="text-center text-xs font-semibold text-brand-forest/65 sm:text-sm">
                 Admins
               </div>
-              <div className="text-center text-xs font-semibold text-white/60 sm:text-sm">
+              <div className="text-center text-xs font-semibold text-brand-forest/65 sm:text-sm">
                 Faculty
               </div>
-              <div className="text-center text-xs font-semibold text-white/60 sm:text-sm">
+              <div className="text-center text-xs font-semibold text-brand-forest/65 sm:text-sm">
                 Learners
               </div>
             </div>
             {tableRows.map((row, i) => (
               <div
                 key={row.feature}
-                className={`grid ${featureTableColumns} gap-3 px-4 py-3.5 sm:gap-4 sm:px-6 ${i < tableRows.length - 1 ? "border-b border-white/5" : ""}`}
+                className={`grid ${featureTableColumns} gap-3 px-4 py-3.5 sm:gap-4 sm:px-6 ${i < tableRows.length - 1 ? "border-b border-brand-forest/6" : ""}`}
               >
-                <div className="text-sm leading-6 text-gray-300">{row.feature}</div>
+                <div className="text-sm leading-6 text-brand-forest/70">{row.feature}</div>
                 <div className="flex justify-center">
-                  {row.admins && <Check className="h-4 w-4 text-brand-sage" />}
+                  {row.admins && <Check className="h-4 w-4 text-brand-bark" />}
                 </div>
                 <div className="flex justify-center">
                   {row.faculty && <Check className="h-4 w-4 text-faculty-pill" />}
